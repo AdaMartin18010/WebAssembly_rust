@@ -3,8 +3,8 @@
 //! 本示例展示了如何使用 WebAssembly 2.0 的新特性进行高性能图像处理。
 //! This example demonstrates how to use WebAssembly 2.0's new features for high-performance image processing.
 
-use c16_webassembly::rust_189_features::*;
-use c16_webassembly::types::*;
+use wasm::rust_189_features::*;
+use wasm::types::*;
 use std::time::Instant;
 
 /// 图像处理演示主函数

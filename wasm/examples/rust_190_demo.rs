@@ -3,8 +3,8 @@
 //! 本示例展示了如何使用 Rust 1.90 的新特性与 WebAssembly 2.0 进行集成开发。
 //! This example demonstrates how to use Rust 1.90's new features with WebAssembly 2.0 for integrated development.
 
-use c16_webassembly::rust_189_features::*;
-use c16_webassembly::types::*;
+use wasm::rust_189_features::*;
+use wasm::types::*;
 use std::time::Instant;
 
 /// 主演示函数

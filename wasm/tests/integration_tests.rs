@@ -3,8 +3,8 @@
 //! 本测试模块验证 Rust 1.90 新特性与 WebAssembly 2.0 的集成功能。
 //! This test module verifies the integration of Rust 1.90 new features with WebAssembly 2.0.
 
-use c16_webassembly::rust_189_features::*;
-use c16_webassembly::types::*;
+use wasm::rust_189_features::*;
+use wasm::types::*;
 use std::time::Instant;
 
 /// 测试常量泛型推断
@@ -436,7 +436,7 @@ fn test_webassembly_runtime_basic() {
 /// Test const generics advanced applications
 #[test]
 fn test_const_generics_advanced() {
-    use c16_webassembly::rust_189_features::const_generics_advanced::*;
+    use wasm::rust_189_features::const_generics_advanced::*;
 
     // 测试 WasmBuffer
     let mut buffer: WasmBuffer<1024> = WasmBuffer::new();
@@ -477,7 +477,7 @@ fn test_const_generics_advanced() {
 /// Test FFI advanced applications
 #[test]
 fn test_ffi_advanced() {
-    use c16_webassembly::rust_189_features::ffi_advanced::*;
+    use wasm::rust_189_features::ffi_advanced::*;
 
     // 测试 I128Calculator
     let result = I128Calculator::safe_add(100i128, 200i128).unwrap();
@@ -513,7 +513,7 @@ fn test_ffi_advanced() {
 /// Test API stabilization applications
 #[test]
 fn test_api_stabilization() {
-    use c16_webassembly::rust_189_features::api_stabilization::*;
+    use wasm::rust_189_features::api_stabilization::*;
 
     // 测试文件锁演示
     let result = demonstrate_file_locks();

@@ -3,8 +3,8 @@
 //! 本示例展示了如何使用 WebAssembly 2.0 的新特性进行高性能科学计算。
 //! This example demonstrates how to use WebAssembly 2.0's new features for high-performance scientific computing.
 
-use c16_webassembly::rust_189_features::*;
-use c16_webassembly::types::*;
+use wasm::rust_189_features::*;
+use wasm::types::*;
 use std::time::Instant;
 
 /// 科学计算演示主函数

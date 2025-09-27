@@ -3,8 +3,8 @@
 //! 本示例展示了 WebAssembly 2.0 的新特性在实际应用中的使用。
 //! This example demonstrates the use of WebAssembly 2.0's new features in practical applications.
 
-use c16_webassembly::rust_189_features::*;
-use c16_webassembly::types::*;
+use wasm::rust_189_features::*;
+use wasm::types::*;
 use std::time::Instant;
 
 /// 主演示函数
