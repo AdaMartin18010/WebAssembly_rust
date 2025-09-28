@@ -1,0 +1,407 @@
+# WebAssembly 2.0 + Rust 1.90 Kubernetes 部署配置
+# WebAssembly 2.0 + Rust 1.90 Kubernetes Deployment Configuration
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: webassembly-ecosystem
+  labels:
+    name: webassembly-ecosystem
+    app: webassembly-2.0
+    version: "2.0.0"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wasm-config
+  namespace: webassembly-ecosystem
+data:
+  ecosystem_config.toml: |
+    [ecosystem]
+    name = "WebAssembly 2.0 Ecosystem"
+    version = "2.0.0"
+    
+    [ecosystem.deployment]
+    security_level = "Maximum"
+    monitoring_enabled = true
+    performance_optimization = true
+    
+    [ecosystem.monitoring]
+    metrics_enabled = true
+    health_check_enabled = true
+    profiling_enabled = true
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: wasm-secrets
+  namespace: webassembly-ecosystem
+type: Opaque
+data:
+  # Base64 编码的密钥
+  api-key: d2ViYXNzZW1ibHkyMDI0 # webassembly2024
+  jwt-secret: bXlqd3RzZWNyZXQyMDI0 # myjwtsecret2024
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wasm-service
+  namespace: webassembly-ecosystem
+  labels:
+    app: wasm-service
+    version: "2.0.0"
+    component: backend
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: wasm-service
+  template:
+    metadata:
+      labels:
+        app: wasm-service
+        version: "2.0.0"
+        component: backend
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+      - name: wasm-service
+        image: webassembly-2.0-service:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        env:
+        - name: RUST_LOG
+          value: "info"
+        - name: WASM_CONFIG_PATH
+          value: "/app/config/ecosystem_config.toml"
+        - name: WASM_SECURITY_LEVEL
+          value: "Maximum"
+        - name: WASM_MONITORING_ENABLED
+          value: "true"
+        - name: WASM_MEMORY_LIMIT
+          value: "256MB"
+        - name: WASM_CPU_LIMIT
+          value: "2"
+        - name: REDIS_URL
+          value: "redis://redis-service:6379"
+        - name: PROMETHEUS_URL
+          value: "http://prometheus-service:9090"
+        envFrom:
+        - secretRef:
+            name: wasm-secrets
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config
+          readOnly: true
+        - name: logs-volume
+          mountPath: /app/logs
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "500m"
+          limits:
+            memory: "512Mi"
+            cpu: "2000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+      volumes:
+      - name: config-volume
+        configMap:
+          name: wasm-config
+      - name: logs-volume
+        emptyDir: {}
+      nodeSelector:
+        kubernetes.io/os: linux
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - wasm-service
+              topologyKey: kubernetes.io/hostname
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wasm-service
+  namespace: webassembly-ecosystem
+  labels:
+    app: wasm-service
+    version: "2.0.0"
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8080"
+    prometheus.io/path: "/metrics"
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  selector:
+    app: wasm-service
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: wasm-ingress
+  namespace: webassembly-ecosystem
+  labels:
+    app: wasm-service
+    version: "2.0.0"
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  tls:
+  - hosts:
+    - wasm.example.com
+    secretName: wasm-tls-secret
+  rules:
+  - host: wasm.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: wasm-service
+            port:
+              number: 8080
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: wasm-hpa
+  namespace: webassembly-ecosystem
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: wasm-service
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 10
+        periodSeconds: 60
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: wasm-pdb
+  namespace: webassembly-ecosystem
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: wasm-service
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+  namespace: webassembly-ecosystem
+  labels:
+    app: redis
+spec:
+  type: ClusterIP
+  ports:
+  - port: 6379
+    targetPort: 6379
+    protocol: TCP
+  selector:
+    app: redis
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: webassembly-ecosystem
+  labels:
+    app: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:7-alpine
+        ports:
+        - containerPort: 6379
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        volumeMounts:
+        - name: redis-data
+          mountPath: /data
+      volumes:
+      - name: redis-data
+        emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-service
+  namespace: webassembly-ecosystem
+  labels:
+    app: prometheus
+spec:
+  type: ClusterIP
+  ports:
+  - port: 9090
+    targetPort: 9090
+    protocol: TCP
+  selector:
+    app: prometheus
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: webassembly-ecosystem
+  labels:
+    app: prometheus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      containers:
+      - name: prometheus
+        image: prom/prometheus:latest
+        ports:
+        - containerPort: 9090
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "200m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        volumeMounts:
+        - name: prometheus-config
+          mountPath: /etc/prometheus
+        - name: prometheus-data
+          mountPath: /prometheus
+      volumes:
+      - name: prometheus-config
+        configMap:
+          name: prometheus-config
+      - name: prometheus-data
+        emptyDir: {}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: webassembly-ecosystem
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+    
+    scrape_configs:
+    - job_name: 'wasm-service'
+      static_configs:
+      - targets: ['wasm-service:8080']
+      metrics_path: /metrics
+      scrape_interval: 5s

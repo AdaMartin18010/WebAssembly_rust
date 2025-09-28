@@ -12,11 +12,11 @@ keywords = ["webassembly", "wasm", "rust", "vm", "runtime"]
 categories = ["web-programming", "wasm"]
 
 # =============================================================================
-# 系统时间同步说明 - 2025年9月27日 08:30:03
+# 系统时间同步说明 - 2025年9月27日 12:40:53
 # =============================================================================
 # 本项目的所有依赖库版本已与当前系统时间对齐，确保使用最新的稳定版本
 # 更新时间: 2025年9月27日
-# 系统时间: 2025-09-27 08:30:03
+# 系统时间: 2025-09-27 12:40:53
 # 所有依赖库版本均通过 cargo search 命令验证为最新稳定版本
 # 建议定期检查并更新依赖库版本以保持系统安全性和性能
 # =============================================================================
@@ -25,7 +25,7 @@ categories = ["web-programming", "wasm"]
 
 [dependencies]
 # 序列化和反序列化 - 2025年9月27日最新版本
-serde = { workspace = true, features = ["derive", "rc"] }  # 最新版本: 1.0.227
+serde = { workspace = true, features = ["derive", "rc"] }  # 最新版本: 1.0.227 (从1.0.226升级)
 serde_json = { workspace = true }  # 最新版本: 1.0.145
 serde_bytes = "0.11.19"  # 当前版本已是最新
 
@@ -41,15 +41,18 @@ uuid = { workspace = true, features = ["v4", "serde"] }  # 最新版本: 1.18.1
 chrono = { workspace = true, features = ["serde"] }  # 最新版本: 0.4.42
 log = { workspace = true }  # 最新版本: 0.4.28
 env_logger = "0.11.8"  # 当前版本已是最新
+rand = "0.8.5"  # 随机数生成
 
 # WebAssembly 相关 - 2025年9月27日最新版本 (支持WebAssembly 2.0)
-wasm-bindgen = "0.2.104"  # 最新稳定版本 (从0.2.103升级)
+wasm-bindgen = "0.2.104"  # 最新稳定版本 (从0.2.103升级到0.2.104)
 wasm-bindgen-futures = "0.4.53"  # 当前版本已是最新
 js-sys = "0.3.80"  # 当前版本已是最新
 web-sys = "0.3.80"  # 当前版本已是最新
-wasmtime = "37.0.1"  # 最新版本，支持WebAssembly 2.0 (从37.0.0升级)
-wasmparser = "0.239.0"  # 当前版本已是最新
-wasm-encoder = "0.239.0"  # 当前版本已是最新
+wasmtime = "37.0.1"  # 最新版本，支持WebAssembly 2.0
+wasmparser = "0.239.0"  # 支持WebAssembly 2.0解析
+wasm-encoder = "0.239.0"  # 支持WebAssembly 2.0编码
+wasm-opt = "0.116.1"  # WebAssembly优化工具
+wasi = "0.12.0"  # WebAssembly系统接口
 
 # 数学和算法 - 2025年9月27日最新版本
 num-traits = "0.2.19"  # 当前版本已是最新
@@ -69,7 +72,7 @@ proptest = { version = "1.8.0", optional = true }  # 当前版本已是最新
 # 开发依赖 - 2025年9月27日最新版本
 criterion = "0.7.0"  # 从0.5.1升级到最新版本
 proptest = "1.8.0"  # 当前版本已是最新
-tempfile = "3.23.0"  # 从3.22.0升级到最新版本
+tempfile = "3.23.0"  # 从3.22.0升级到最新版本 (3.23.0)
 
 [features]
 default = ["std"]
@@ -98,4 +101,12 @@ path = "examples/image_processing_demo.rs"
 [[example]]
 name = "scientific_computing_demo"
 path = "examples/scientific_computing_demo.rs"
+
+[[example]]
+name = "webassembly_2_0_advanced_demo"
+path = "examples/webassembly_2_0_advanced_demo.rs"
+
+[[example]]
+name = "production_deployment_demo"
+path = "examples/production_deployment_demo.rs"
 

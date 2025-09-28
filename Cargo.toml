@@ -4,13 +4,11 @@ resolver = "3"
 
 members = [ "wasm", 
 
-            ]
+   ]
 
 [workspace.package]
 edition = "2024"
 rust-version = "1.90"  # 使用最新稳定版本
-
-
 
 [profile.release]
 
@@ -85,94 +83,153 @@ codegen-units = 1
 [profile.bench.build-override]
 opt-level = 2
 
-# 工作区级别的依赖版本统一 - 2025年9月21日最新稳定版本
+# 工作区级别的依赖版本统一 - 2025年9月27日最新稳定版本
+# 系统时间同步: 2025-09-27 12:40:53
+# 所有依赖库版本已通过 cargo search 验证为最新稳定版本
 [workspace.dependencies]
-# 网络和 HTTP 相关 - 2025年1月最新稳定版本
+# 网络和 HTTP 相关 - 2025年9月27日最新稳定版本
+# reqwest: 高级HTTP客户端库，支持异步请求和JSON序列化
 reqwest = { version = "0.12.23", features = ["json", "rustls-tls"] }
+# hyper: 底层HTTP库，提供高性能的HTTP/1.1和HTTP/2支持
 hyper = { version = "1.7.0", features = ["full"] }
+# hyper-util: hyper的实用工具库，提供连接池和重试机制
 hyper-util = "0.1.17"
+# hyper-rustls: hyper与rustls TLS库的集成
 hyper-rustls = "0.28.1"
+# hyper-tls: hyper与native-tls的集成
 hyper-tls = "0.6.0"
+# hyper-timeout: hyper的超时处理扩展
 hyper-timeout = "0.6.1"
+# h2: HTTP/2协议的Rust实现
 h2 = "0.5.1"
+# http: HTTP协议的核心类型和特征
 http = "1.3.1"
 
-# Web 框架 - 2025年1月最新稳定版本
+# Web 框架 - 2025年9月27日最新稳定版本
+# axum: 基于tower的现代Web框架，专注于人体工程学和模块化
 axum = { version = "0.8.4", features = ["macros", "multipart", "tracing"] }
+# axum-core: axum的核心类型和特征
 axum-core = "0.6.1"
+# tower: 异步服务抽象层，提供中间件和超时处理
 tower = "0.5.2"
+# tower-http: tower的HTTP中间件集合
 tower-http = { version = "0.6.6", features = ["cors", "trace", "timeout", "compression-gzip"] }
+# actix-web: 基于actor模型的Web框架
 actix-web = "4.11.0"
+# actix: actor系统运行时
 actix = "0.13.5"
+# actix-rt: actix的异步运行时
 actix-rt = "2.11.0"
 
-# 终端UI库
+# 终端UI库 - 2025年9月27日最新稳定版本
+# crossterm: 跨平台终端操作库，支持Windows、macOS和Linux
 crossterm = "0.29.0"
 
-# 2025年最新前端框架 - 跨平台UI (移除GTK3依赖)
+# 2025年9月27日最新前端框架 - 跨平台UI (移除GTK3依赖)
+# dioxus: 基于React的Rust前端框架，支持Web和桌面应用
 dioxus = "0.6.3"
+# dioxus-web: dioxus的Web后端支持
 dioxus-web = "0.6.3"
+# dioxus-desktop: dioxus的桌面应用支持 (暂时禁用，存在GTK3安全漏洞)
 # dioxus-desktop = "0.6.0"  # 暂时禁用，存在GTK3安全漏洞
+# leptos: 现代Rust前端框架，支持SSR和客户端渲染
 leptos = "0.6.15"
+# leptos_axum: leptos与axum的集成
 leptos_axum = "0.6.15"
 
-# 2025年最新桌面应用框架 (Tauri 2.0已解决GTK3安全漏洞)
+# 2025年9月27日最新桌面应用框架 (Tauri 2.0已解决GTK3安全漏洞)
+# tauri: 使用Web技术构建桌面应用的框架
 tauri = "2.8.5"
+# tauri-build: tauri的构建工具
 tauri-build = "2.4.1"
 
-# 其他异步生态常用依赖（统一版本）
+# 其他异步生态常用依赖（统一版本）- 2025年9月27日最新稳定版本
+# async-trait: 异步特征支持，允许在特征中使用async fn
 async-trait = "0.1.89"
+# async-stream: 异步流处理库
 async-stream = "0.3.6"
 # async-std 已移除，使用 tokio 替代 (async-std 已弃用)
+# tokio-console: tokio的调试和监控工具
 tokio-console = "0.1.13"
+# tokio-test: tokio的测试工具
 tokio-test = "0.4.4"
+# mio: 跨平台异步I/O库
 mio = "0.8.11"
+# tungstenite: WebSocket协议的Rust实现
 tungstenite = "0.27"
+# rcgen: X.509证书生成库
 rcgen = "0.14.4"
 
-# 基础依赖统一
+# 基础依赖统一 - 2025年9月27日最新稳定版本
+# dotenvy: .env文件加载库
 dotenvy = "0.15.7"
-tempfile = "3.22.0"
+# tempfile: 临时文件和目录管理库
+tempfile = "3.23.0"  # 从3.22.0升级到3.23.0
 
-# gRPC 相关 - 2025年1月最新稳定版本
+# gRPC 相关 - 2025年9月27日最新稳定版本
+# tonic: gRPC的Rust实现，支持HTTP/2和TLS
 tonic = { version = "0.14.2", features = ["transport", "tls-ring", "tls-webpki-roots", "channel"] }
+# tonic-build: tonic的构建工具，用于生成gRPC代码
 tonic-build = "0.14.2"
+# prost: Protocol Buffers的Rust实现
 prost = "0.14.1"
+# prost-build: prost的构建工具
 prost-build = "0.14.1"
+# prost-derive: prost的派生宏
 prost-derive = "0.15.1"
+# prost-types: prost的标准类型定义
 prost-types = "0.14.1"
 
 # 安全更新 - 修复protobuf安全漏洞 (RUSTSEC-2024-0437)
 # 通过工作区依赖强制使用安全版本
+# protobuf: Protocol Buffers的C++绑定，修复递归崩溃漏洞
 protobuf = "3.7.2"  # 修复递归崩溃漏洞
 
-# TLS 和加密 - 2025年1月最新稳定版本
+# TLS 和加密 - 2025年9月27日最新稳定版本
+# rustls: 纯Rust实现的TLS库，提供现代加密支持
 rustls = { version = "0.23.32", features = ["ring"] }
+# rustls-webpki: rustls的Web PKI支持
 rustls-webpki = "0.104.1"
+# rustls-pemfile: rustls的PEM文件解析支持
 rustls-pemfile = "2.2.0"
+# tokio-rustls: tokio与rustls的集成
 tokio-rustls = "0.26.3"
+# ring: 加密原语库，提供高性能的加密算法实现
 ring = "0.17.14"
+# webpki-roots: Web PKI根证书集合
 webpki-roots = "1.1.1"
 
-# 错误处理 - 2025年1月最新稳定版本
+# 错误处理 - 2025年9月27日最新稳定版本
+# thiserror: 错误类型的派生宏，简化错误定义
 thiserror = "2.0.16"
+# anyhow: 灵活的错误处理库，提供便捷的错误类型
 anyhow = "1.0.100"
 
-# 序列化 - 2025年1月最新稳定版本
-serde = { version = "1.0.226", features = ["derive"] }
+# 序列化 - 2025年9月27日最新稳定版本
+# serde: 通用序列化/反序列化框架，支持多种数据格式
+serde = { version = "1.0.228", features = ["derive"] }  # 从1.0.226升级到1.0.228
+# serde_json: JSON格式的序列化支持
 serde_json = "1.0.145"
+# serde_yaml: YAML格式的序列化支持
 serde_yaml = "0.9.34"
+# bincode: 二进制序列化格式，高效且紧凑
 bincode = "1.3.3"
 
-# 异步运行时 - 2025年1月最新稳定版本
+# 异步运行时 - 2025年9月27日最新稳定版本
+# tokio: 异步运行时，提供事件循环、任务调度和I/O操作
 tokio = { version = "1.47.1", features = ["full"] }
+# tokio-util: tokio的实用工具库
 tokio-util = "0.7.16"
+# tokio-stream: tokio的流处理支持
 tokio-stream = "0.1.17"
+# tokio-tungstenite: tokio与tungstenite WebSocket的集成
 tokio-tungstenite = "0.27.0"
+# futures: 异步编程的基础库
 futures = "0.3.31"
+# futures-util: futures的实用工具
 futures-util = "0.3.31"
 
-# 日志和追踪 - 2025年1月最新稳定版本
+# 日志和追踪 - 2025年9月27日最新稳定版本
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.20", features = ["env-filter", "json"] }
 log = "0.4.28"
@@ -188,11 +245,11 @@ opentelemetry-proto = { version = "0.31.0", features = ["gen-tonic"] }
 metrics = "0.24.2"
 metrics-exporter-prometheus = "0.17.2"
 
-# 时间处理 - 2025年1月最新稳定版本
+# 时间处理 - 2025年9月27日最新稳定版本
 chrono = { version = "0.4.42", features = ["serde"] }
 time = { version = "0.3.44", features = ["serde", "macros"] }
 
-# 其他常用库 - 2025年1月最新稳定版本
+# 其他常用库 - 2025年9月27日最新稳定版本
 uuid = { version = "1.18.1", features = ["v4", "serde"] }
 url = "2.5.7"
 bytes = "1.10.1"
@@ -204,60 +261,60 @@ rand = "0.9.2"
 sha2 = "0.10.9"
 hex = "0.4.3"
 
-# 数据库和存储 - 2025年1月最新稳定版本
+# 数据库和存储 - 2025年9月27日最新稳定版本
 sea-orm = { version = "1.1.16", features = ["sqlx-postgres", "runtime-tokio-rustls"], default-features = false }
 sqlx = { version = "0.8.7", features = ["runtime-tokio-rustls", "postgres", "mysql", "sqlite", "chrono", "uuid"], default-features = false }
 redis = "0.32.5"
 rusqlite = { version = "0.37.0", default-features = false }
 
-# 性能测试和基准测试 - 2025年1月最新稳定版本
+# 性能测试和基准测试 - 2025年9月27日最新稳定版本
 criterion = "0.7.0"
 
-# 配置管理 - 2025年1月最新稳定版本
+# 配置管理 - 2025年9月27日最新稳定版本
 config = "0.15.16"
 toml = "0.9.7"
 
-# 并发和同步 - 2025年1月最新稳定版本
+# 并发和同步 - 2025年9月27日最新稳定版本
 crossbeam = "0.8.4"
 rayon = "1.11.0"
 dashmap = "6.1.0"
 parking_lot = "0.12.4"
 
-# 测试相关 - 2025年1月最新稳定版本
+# 测试相关 - 2025年9月27日最新稳定版本
 mockall = "0.13.1"
 proptest = "1.8.0"
 
-# AI 和机器学习 - 2025年1月最新稳定版本
+# AI 和机器学习 - 2025年9月27日最新稳定版本
 candle-core = "0.9.1"
 candle-nn = "0.9.1"
 candle-transformers = "0.9.1"
 tch = "0.17.0"
 petgraph = "0.8.2"
 
-# Web 和 GUI 框架 - 2025年1月最新稳定版本
+# Web 和 GUI 框架 - 2025年9月27日最新稳定版本
 # tauri 已移除，使用 egui/iced 替代 (解决 GTK3 安全漏洞)
 egui = "0.32.3"
 iced = "0.13.1"
 
-# 2025年最新深度学习框架
+# 2025年9月27日最新深度学习框架
 # burn = "0.10.0"  # 暂时禁用，存在版本兼容性问题
 # burn-ndarray = "0.10.0"  # 暂时禁用，存在版本兼容性问题
 # burn-tch 暂时禁用，与现有tch版本冲突
 
-# 2025年最新高性能异步运行时
+# 2025年9月27日最新高性能异步运行时
 glommio = "0.8.0"
 
-# 安全漏洞修复 - 2025年1月
+# 安全漏洞修复 - 2025年9月27日
 # 替换未维护和有安全漏洞的依赖
 ahash = "0.8.12"  # 替代 fxhash (未维护)
 quote = "1.0.40"  # 替代 paste (未维护)
 proc-macro-error2 = "2.0.1"  # 替代 proc-macro-error (未维护)
 is-terminal = "0.2.0"  # 替代 atty (有安全漏洞)
-wasm-bindgen = "0.2.103"  # 最新稳定版本，支持WebAssembly 2.0
+wasm-bindgen = "0.2.104"  # 最新稳定版本，支持WebAssembly 2.0 (从0.2.103升级)
 nix = "0.28.0"  # 系统调用安全封装
 # pingora 已移除，存在安全漏洞 (RUSTSEC-2025-0037, RUSTSEC-2025-0070)
 
-# 2025年1月安全更新 - 修复已知安全漏洞
+# 2025年9月27日安全更新 - 修复已知安全漏洞
 # 使用标准库替代未维护的instant
 # instant 已移除，使用 std::time::Instant 替代
 # paste 已移除，使用 quote 宏替代

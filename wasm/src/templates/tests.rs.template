@@ -1,0 +1,39 @@
+//! WebAssembly 测试模板
+//! WebAssembly Test Template
+
+use wasm_bindgen_test::*;
+use wasm_bindgen::prelude::*;
+
+// 导入要测试的模块
+// Import the module to be tested
+use crate::*;
+
+/// 测试加法函数
+/// Test addition function
+#[wasm_bindgen_test]
+fn test_add() {
+    assert_eq!(add(2, 3), 5);
+    assert_eq!(add(-1, 1), 0);
+    assert_eq!(add(0, 0), 0);
+}
+
+/// 测试乘法函数
+/// Test multiplication function
+#[wasm_bindgen_test]
+fn test_multiply() {
+    assert_eq!(multiply(2, 3), 6);
+    assert_eq!(multiply(-1, 1), -1);
+    assert_eq!(multiply(0, 5), 0);
+}
+
+/// 测试斐波那契函数
+/// Test fibonacci function
+#[wasm_bindgen_test]
+fn test_fibonacci() {
+    assert_eq!(fibonacci(0), 0);
+    assert_eq!(fibonacci(1), 1);
+    assert_eq!(fibonacci(2), 1);
+    assert_eq!(fibonacci(3), 2);
+    assert_eq!(fibonacci(4), 3);
+    assert_eq!(fibonacci(5), 5);
+}

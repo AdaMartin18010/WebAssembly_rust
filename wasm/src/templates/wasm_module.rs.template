@@ -1,0 +1,29 @@
+//! WebAssembly 模块模板
+//! WebAssembly Module Template
+
+use wasm_bindgen::prelude::*;
+
+/// 导出的函数示例
+/// Example exported function
+#[wasm_bindgen]
+pub fn add(a: i32, b: i32) -> i32 {
+    a + b
+}
+
+/// 导出的函数示例
+/// Example exported function
+#[wasm_bindgen]
+pub fn multiply(a: i32, b: i32) -> i32 {
+    a * b
+}
+
+/// 导出的函数示例
+/// Example exported function
+#[wasm_bindgen]
+pub fn fibonacci(n: i32) -> i32 {
+    if n <= 1 {
+        n
+    } else {
+        fibonacci(n - 1) + fibonacci(n - 2)
+    }
+}

@@ -1,0 +1,34 @@
+//! WebAssembly 绑定模板
+//! WebAssembly Bindings Template
+
+use wasm_bindgen::prelude::*;
+
+/// JavaScript 绑定示例
+/// JavaScript binding example
+#[wasm_bindgen]
+extern "C" {
+    /// 控制台日志函数
+    /// Console log function
+    #[wasm_bindgen(js_namespace = console)]
+    fn log(s: &str);
+}
+
+/// 宏定义用于日志输出
+/// Macro definition for log output
+macro_rules! console_log {
+    ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
+}
+
+/// 导出的函数示例
+/// Example exported function
+#[wasm_bindgen]
+pub fn greet(name: &str) {
+    console_log!("Hello, {}!", name);
+}
+
+/// 导出的函数示例
+/// Example exported function
+#[wasm_bindgen]
+pub fn get_timestamp() -> f64 {
+    js_sys::Date::now()
+}

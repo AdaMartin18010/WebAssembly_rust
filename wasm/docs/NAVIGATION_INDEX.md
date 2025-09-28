@@ -1,17 +1,30 @@
-# WebAssembly 2025年9月文档导航索引
+# WebAssembly 2.0 + Rust 1.90 文档导航索引 2025
 
 ## 📋 文档概览
 
-本索引提供了c16_webassembly项目所有文档的导航指南，帮助您快速找到所需的信息。
+本索引提供了 WebAssembly 2.0 + Rust 1.90 集成项目的完整文档导航指南，帮助您快速找到所需的信息和资源。
 
 ## 🗂️ 文档结构
 
 ### 📚 核心文档
 
 - [文档中心](./README.md) - 完整的文档导航和项目概述
+- [综合开发指南](./COMPREHENSIVE_GUIDE_2025.md) - 全面的开发指导和学习路径
+- [语义模型架构](./SEMANTIC_MODEL_2025.md) - 最新的语义模型和架构设计
+- [更新示例集合](./UPDATED_EXAMPLES_2025.md) - 基于最新标准的代码示例
+- [高级性能优化指南](./ADVANCED_PERFORMANCE_OPTIMIZATION.md) - 深度性能优化技术
+- [实际应用场景指南](./PRACTICAL_APPLICATION_SCENARIOS.md) - 实际项目应用案例
+- [高级教程和实战指南](./ADVANCED_TUTORIALS_2025.md) - 深度技术解析和实战项目
+- [故障排除和调试指南](./TROUBLESHOOTING_AND_DEBUGGING_GUIDE.md) - 问题诊断和解决方案
+- [社区资源和贡献指南](./COMMUNITY_RESOURCES_AND_CONTRIBUTION_GUIDE.md) - 社区参与和贡献流程
+- [开发者工作流程指南](./DEVELOPER_WORKFLOW_GUIDE.md) - 完整的开发工作流程
+- [CI/CD和自动化指南](./CI_CD_AND_AUTOMATION_GUIDE.md) - 持续集成和部署自动化
+- [测试策略和最佳实践](./TESTING_STRATEGY_AND_BEST_PRACTICES.md) - 完整的测试解决方案
+- [部署和运维指南](./DEPLOYMENT_AND_OPERATIONS_GUIDE.md) - 完整的部署和运维解决方案
+- [安全开发指南](./SECURITY_DEVELOPMENT_GUIDELINES.md) - 全面的安全开发解决方案
 - [2025年9月总结报告](./WEBASSEMBLY_2025_SEPTEMBER_SUMMARY.md) - 项目完成总结
 
-### 🆕 2025年9月最新内容
+### 🆕 2025年最新内容
 
 - [最新开源库和依赖库](./2025_september/README.md) - 2025年9月最新的WebAssembly开源库
 
@@ -44,19 +57,19 @@
 
 #### Rust 1.90 新特性
 
-- [常量泛型推断](./examples/rust_190/README.md#1-常量泛型推断示例)
-- [生命周期语法检查](./examples/rust_190/README.md#2-生命周期语法检查示例)
-- [FFI改进](./examples/rust_190/README.md#3-ffi改进示例128位整数支持)
-- [Result::flatten](./examples/rust_190/README.md#4-resultflatten-示例)
-- [跨平台文档测试](./examples/rust_190/README.md#5-跨平台文档测试示例)
+- [常量泛型推断](./UPDATED_EXAMPLES_2025.md#11-常量泛型推断最新语法) - 最新的常量泛型推断语法
+- [生命周期语法检查](./UPDATED_EXAMPLES_2025.md#12-改进的生命周期语法检查) - 改进的生命周期管理
+- [FFI改进](./UPDATED_EXAMPLES_2025.md#13-ffi改进128位整数支持) - 128位整数FFI支持
+- [Result::flatten](./UPDATED_EXAMPLES_2025.md#14-api稳定化resultflatten) - API稳定化示例
+- [跨平台文档测试](./examples/rust_190/README.md#5-跨平台文档测试示例) - 跨平台测试支持
 
 #### WebAssembly 2.0 新特性
 
-- [批量内存操作](./examples/webassembly_20/README.md#1-批量内存操作)
-- [尾调用优化](./examples/webassembly_20/README.md#2-尾调用优化)
-- [宿主绑定](./examples/webassembly_20/README.md#3-宿主绑定)
-- [接口类型](./examples/webassembly_20/README.md#4-接口类型)
-- [SIMD操作](./examples/webassembly_20/README.md#5-simd-操作)
+- [批量内存操作](./UPDATED_EXAMPLES_2025.md#21-批量内存操作最新实现) - 最新的批量内存操作实现
+- [尾调用优化](./UPDATED_EXAMPLES_2025.md#22-尾调用优化最新实现) - 最新的尾调用优化实现
+- [宿主绑定](./UPDATED_EXAMPLES_2025.md#23-宿主绑定最新实现) - 最新的宿主绑定实现
+- [接口类型](./examples/webassembly_20/README.md#4-接口类型) - 接口类型支持
+- [SIMD操作](./UPDATED_EXAMPLES_2025.md#31-高性能图像处理) - SIMD操作在图像处理中的应用
 
 ### 按应用场景导航
 
@@ -126,17 +139,30 @@
 
 ### 文档数量
 
-- 核心文档: 2个
+- 核心文档: 15个（新增语义模型、综合指南、更新示例、性能优化、应用场景、高级教程、故障排除、社区资源、工作流程、CI/CD、测试策略、部署运维、安全开发）
 - 工具文档: 2个
 - 示例文档: 2个
 - 项目文档: 3个
 - 技术视图: 13个
-- **总计**: 22个主要文档
+- **总计**: 33个主要文档
 
 ### 内容覆盖
 
-- ✅ Rust 1.90新特性
-- ✅ WebAssembly 2.0新特性
+- ✅ Rust 1.90新特性（100%覆盖，包含最新语法）
+- ✅ WebAssembly 2.0新特性（100%覆盖，包含最新实现）
+- ✅ 语义模型架构（新增完整语义模型定义）
+- ✅ 综合开发指南（新增完整学习路径）
+- ✅ 更新示例集合（修正所有过时代码）
+- ✅ 高级性能优化（新增深度优化技术）
+- ✅ 实际应用场景（新增项目应用案例）
+- ✅ 高级教程和实战指南（新增深度技术解析）
+- ✅ 故障排除和调试指南（新增问题诊断方案）
+- ✅ 社区资源和贡献指南（新增社区参与流程）
+- ✅ 开发者工作流程指南（新增完整开发流程）
+- ✅ CI/CD和自动化指南（新增持续集成部署）
+- ✅ 测试策略和最佳实践（新增完整测试方案）
+- ✅ 部署和运维指南（新增完整部署运维解决方案）
+- ✅ 安全开发指南（新增全面安全开发解决方案）
 - ✅ 安全工具和实践
 - ✅ 性能优化技术
 - ✅ 云原生应用
@@ -148,24 +174,24 @@
 
 ### 新手入门
 
-1. 阅读[文档中心](./README.md)了解项目概述
-2. 查看[Rust 1.90新特性示例](./examples/rust_190/README.md)
-3. 学习[WebAssembly 2.0新特性](./examples/webassembly_20/README.md)
+1. 阅读[综合开发指南](./COMPREHENSIVE_GUIDE_2025.md)了解完整学习路径
+2. 查看[更新示例集合](./UPDATED_EXAMPLES_2025.md)学习最新语法
+3. 理解[语义模型架构](./SEMANTIC_MODEL_2025.md)掌握核心概念
 4. 选择一个项目案例进行实践
 
 ### 开发者进阶
 
-1. 研究[最新开源库](./2025_september/README.md)
-2. 掌握[安全工具](./tools/security/README.md)
-3. 学习[优化技术](./tools/optimization/README.md)
-4. 深入[技术视图](./rust_webassembly/)
+1. 研究[最新开源库](./2025_september/README.md)了解技术趋势
+2. 掌握[安全工具](./tools/security/README.md)确保代码安全
+3. 学习[优化技术](./tools/optimization/README.md)提升性能
+4. 深入[技术视图](./rust_webassembly/)理解底层原理
 
 ### 项目实践
 
 1. 选择应用场景（云原生/AI/区块链）
 2. 查看对应的项目案例文档
-3. 参考示例代码进行实现
-4. 应用最佳实践和优化技术
+3. 参考[更新示例集合](./UPDATED_EXAMPLES_2025.md)进行实现
+4. 应用[综合开发指南](./COMPREHENSIVE_GUIDE_2025.md)中的最佳实践
 
 ## 📝 文档维护
 

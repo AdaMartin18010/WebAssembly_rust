@@ -1170,6 +1170,30 @@ pub enum ValidationError {
     /// WebAssembly 2.0 接口类型错误 / WebAssembly 2.0 Interface type error
     #[error("接口类型错误: {message}")]
     InterfaceTypeError { message: String },
+    /// 特性依赖错误 / Feature dependency error
+    #[error("特性依赖错误: 特性 {feature} 需要 {required}")]
+    FeatureDependencyError {
+        feature: String,
+        required: String,
+    },
+    /// 多值不支持 / Multi-value not supported
+    #[error("多值不支持")]
+    MultiValueNotSupported,
+    /// 无效异常标签 / Invalid exception tag
+    #[error("无效异常标签: {0}")]
+    InvalidExceptionTag(u32),
+    /// 处理器中的无效指令 / Invalid instruction in handler
+    #[error("处理器中的无效指令")]
+    InvalidInstructionInHandler,
+    /// 无效异常类型 / Invalid exception type
+    #[error("无效异常类型")]
+    InvalidExceptionType,
+    /// 空异常类型 / Empty exception type
+    #[error("空异常类型")]
+    EmptyExceptionType,
+    /// 无效共享内存 / Invalid shared memory
+    #[error("无效共享内存")]
+    InvalidSharedMemory,
 }
 
 /// 编译错误 / Compilation Error

@@ -33,12 +33,15 @@ c16_webassembly 是一个基于 Rust 1.89 特性的 WebAssembly 2.0 集成项目
 
 ## 📚 文档导航
 
-### 🗂️ 文档索引
+### 🗂️ 核心文档
 
 - [📋 文档导航索引](./NAVIGATION_INDEX.md) - 完整的文档导航指南
+- [🚀 综合开发指南](./COMPREHENSIVE_GUIDE_2025.md) - 全面的开发指导和学习路径
+- [🏗️ 语义模型架构](./SEMANTIC_MODEL_2025.md) - 最新的语义模型和架构设计
+- [💻 更新示例集合](./UPDATED_EXAMPLES_2025.md) - 基于最新标准的代码示例
 - [📊 2025年9月总结报告](./WEBASSEMBLY_2025_SEPTEMBER_SUMMARY.md) - 项目完成总结
 
-### 🆕 2025年9月最新内容
+### 🆕 2025年最新内容
 
 - [📦 最新开源库和依赖库](./2025_september/README.md) - 2025年9月最新的WebAssembly开源库
 
@@ -104,18 +107,18 @@ let result = vm.call_function(&instance, "add", &[Value::I32(5), Value::I32(3)])
 println!("结果: {:?}", result);
 ```
 
-### 3. 使用 Rust 1.89 特性
+### 3. 使用 Rust 1.90 特性
 
 ```rust
-use c16_webassembly::rust189::*;
+use c16_webassembly::rust190::*;
 
-// 使用常量泛型推断
-let buffer: [u8; 1024] = create_wasm_buffer(); // 编译器自动推断大小
+// 使用常量泛型推断（最新语法）
+let buffer: WasmBuffer<1024> = WasmBuffer::new(); // 编译器自动推断大小
 
 // 使用改进的生命周期管理
 let module_ref = process_wasm_module(&module);
 
-// 使用稳定的 API
+// 使用稳定的 API（Result::flatten）
 let result = wasm_operation().flatten();
 ```
 
@@ -124,19 +127,19 @@ let result = wasm_operation().flatten();
 ```rust
 use c16_webassembly::wasm2::*;
 
-// 批量内存操作
+// 批量内存操作（最新实现）
 let mut memory_manager = BulkMemoryManager::new(1024);
 memory_manager.bulk_copy(0, 100, 50)?;
 memory_manager.bulk_fill(200, 0xFF, 25)?;
 
-// 尾调用优化
+// 尾调用优化（最新实现）
 let mut optimizer = TailCallOptimizer::new();
 let args = vec![Value::I32(42), Value::I64(123)];
 let result = optimizer.execute_tail_call(0, args)?;
 
-// 宿主绑定
+// 宿主绑定（最新实现）
 let mut binding_manager = HostBindingManager::new();
-binding_manager.register_binding("console.log".to_string(), HostBindingType::JavaScriptFunction);
+binding_manager.register_javascript_function("console.log".to_string(), js_function)?;
 let result = binding_manager.call_javascript_function("console.log", args)?;
 ```
 
