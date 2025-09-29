@@ -75,11 +75,21 @@ proptest = "1.8.0"  # 当前版本已是最新
 tempfile = "3.23.0"  # 从3.22.0升级到最新版本 (3.23.0)
 
 [features]
-default = ["std"]
+default = ["std", "webassembly-2-0", "rust-190"]
 std = []
 no_std = []
 bench = ["criterion"]
 test = ["proptest"]
+webassembly-2-0 = ["simd", "bulk-memory", "tail-calls", "host-bindings", "interface-types"]
+rust-190 = ["const-generics", "improved-lifetimes", "ffi-improvements"]
+simd = []
+bulk-memory = []
+tail-calls = []
+host-bindings = []
+interface-types = []
+const-generics = []
+improved-lifetimes = []
+ffi-improvements = []
 
 [[bench]]
 name = "performance_benchmarks"

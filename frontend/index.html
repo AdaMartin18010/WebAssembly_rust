@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebAssembly 2.0 + Rust 1.90 演示</title>
+    <meta name="description" content="高性能WebAssembly应用演示平台，展示WebAssembly 2.0和Rust 1.90的最新特性">
+    <meta name="keywords" content="WebAssembly, Rust, 性能, 演示, 前端, 后端">
+    <meta name="author" content="WebAssembly Rust Team">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://your-domain.com/">
+    <meta property="og:title" content="WebAssembly 2.0 + Rust 1.90 演示">
+    <meta property="og:description" content="高性能WebAssembly应用演示平台">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://your-domain.com/">
+    <meta property="og:image" content="https://your-domain.com/og-image.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="WebAssembly 2.0 + Rust 1.90 演示">
+    <meta name="twitter:description" content="高性能WebAssembly应用演示平台">
+    <meta name="twitter:image" content="https://your-domain.com/twitter-image.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .demo-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .demo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .demo-card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .demo-card p {
+            margin-bottom: 20px;
+            line-height: 1.6;
+            color: #666;
+        }
+
+        .demo-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .input-group label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .input-group input, .input-group select {
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .performance-stats {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 40px;
+        }
+
+        .performance-stats h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            opacity: 0.8;
+            margin-top: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .demo-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header" role="banner">
+            <h1>🚀 WebAssembly 2.0 + Rust 1.90</h1>
+            <p>高性能WebAssembly应用演示平台</p>
+        </header>
+
+        <section class="performance-stats" aria-labelledby="performance-stats-title">
+            <h2 id="performance-stats-title">📊 性能统计</h2>
+            <div class="stats-grid" role="region" aria-label="性能指标">
+                <div class="stat-item" role="img" aria-label="加载时间">
+                    <div class="stat-value" id="loadTime" aria-live="polite">-</div>
+                    <div class="stat-label">加载时间 (ms)</div>
+                </div>
+                <div class="stat-item" role="img" aria-label="内存使用">
+                    <div class="stat-value" id="memoryUsage" aria-live="polite">-</div>
+                    <div class="stat-label">内存使用 (MB)</div>
+                </div>
+                <div class="stat-item" role="img" aria-label="执行时间">
+                    <div class="stat-value" id="executionTime" aria-live="polite">-</div>
+                    <div class="stat-label">执行时间 (ms)</div>
+                </div>
+                <div class="stat-item" role="img" aria-label="吞吐量">
+                    <div class="stat-value" id="throughput" aria-live="polite">-</div>
+                    <div class="stat-label">吞吐量 (ops/s)</div>
+                </div>
+            </div>
+        </section>
+
+        <main class="demo-grid" role="main" aria-label="演示功能">
+            <!-- 基础示例 -->
+            <article class="demo-card" role="region" aria-labelledby="basic-demo-title">
+                <h2 id="basic-demo-title">🦀 基础示例</h2>
+                <p>演示Rust 1.90新特性和基本的WebAssembly功能</p>
+                <div class="demo-controls">
+                    <div class="input-group">
+                        <label for="fibInput">斐波那契数列计算</label>
+                        <input type="number" id="fibInput" value="40" min="1" max="50" 
+                               aria-describedby="fibInput-help" 
+                               aria-label="输入斐波那契数列的项数">
+                        <div id="fibInput-help" class="sr-only">输入1到50之间的数字来计算斐波那契数列</div>
+                    </div>
+                    <button class="btn" onclick="runBasicDemo()" 
+                            aria-describedby="basicResult"
+                            aria-label="运行基础示例计算斐波那契数列">
+                        运行基础示例
+                    </button>
+                    <div class="loading" id="basicLoading" role="status" aria-live="polite" style="display: none;">
+                        <div class="spinner" aria-hidden="true"></div>
+                        <span>计算中...</span>
+                    </div>
+                    <div class="result" id="basicResult" role="status" aria-live="polite" style="display: none;"></div>
+                </div>
+            </article>
+
+            <!-- 高级示例 -->
+            <div class="demo-card">
+                <h2>🌐 高级示例</h2>
+                <p>展示WebAssembly 2.0新特性和复杂计算</p>
+                <div class="demo-controls">
+                    <div class="input-group">
+                        <label for="matrixSize">矩阵大小</label>
+                        <input type="number" id="matrixSize" value="100" min="10" max="500">
+                    </div>
+                    <div class="input-group">
+                        <label for="iterations">迭代次数</label>
+                        <input type="number" id="iterations" value="100" min="1" max="1000">
+                    </div>
+                    <button class="btn" onclick="runAdvancedDemo()">运行高级示例</button>
+                    <div class="loading" id="advancedLoading">
+                        <div class="spinner"></div>处理中...
+                    </div>
+                    <div class="result" id="advancedResult" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- 性能示例 -->
+            <div class="demo-card">
+                <h2>⚡ 性能示例</h2>
+                <p>测试WebAssembly性能优化和SIMD操作</p>
+                <div class="demo-controls">
+                    <div class="input-group">
+                        <label for="perfTest">性能测试类型</label>
+                        <select id="perfTest">
+                            <option value="fibonacci">斐波那契缓存</option>
+                            <option value="matrix">矩阵乘法</option>
+                            <option value="sorting">快速排序</option>
+                            <option value="simd">SIMD向量运算</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="perfSize">数据大小</label>
+                        <input type="number" id="perfSize" value="1000" min="100" max="10000">
+                    </div>
+                    <button class="btn" onclick="runPerformanceDemo()">运行性能测试</button>
+                    <div class="loading" id="performanceLoading">
+                        <div class="spinner"></div>测试中...
+                    </div>
+                    <div class="result" id="performanceResult" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- 图像处理示例 -->
+            <div class="demo-card">
+                <h2>🖼️ 图像处理</h2>
+                <p>WebAssembly图像处理和滤镜效果</p>
+                <div class="demo-controls">
+                    <div class="input-group">
+                        <label for="imageFilter">滤镜类型</label>
+                        <select id="imageFilter">
+                            <option value="grayscale">灰度</option>
+                            <option value="blur">模糊</option>
+                            <option value="sharpen">锐化</option>
+                            <option value="edge_detect">边缘检测</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="imageSize">图像大小</label>
+                        <input type="number" id="imageSize" value="256" min="64" max="1024">
+                    </div>
+                    <button class="btn" onclick="runImageDemo()">运行图像处理</button>
+                    <div class="loading" id="imageLoading">
+                        <div class="spinner"></div>处理中...
+                    </div>
+                    <div class="result" id="imageResult" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>© 2025 WebAssembly 2.0 + Rust 1.90 演示项目</p>
+            <p>基于最新的WebAssembly和Rust技术构建</p>
+        </div>
+    </div>
+
+    <script type="module">
+        import init, { 
+            fibonacci, 
+            fibonacci_fast,
+            run_matrix_multiply_benchmark,
+            run_sorting_benchmark,
+            run_simd_benchmark,
+            apply_image_filter
+        } from './pkg/wasm.js';
+
+        // 全局变量
+        let wasmModule = null;
+        let loadStartTime = performance.now();
+
+        // 初始化WebAssembly模块
+        async function initWasm() {
+            try {
+                await init();
+                wasmModule = true;
+                
+                const loadTime = Math.round(performance.now() - loadStartTime);
+                updatePerformanceStats('loadTime', loadTime);
+                
+                console.log('WebAssembly模块加载成功');
+            } catch (error) {
+                console.error('WebAssembly模块加载失败:', error);
+                alert('WebAssembly模块加载失败，请检查浏览器兼容性');
+            }
+        }
+
+        // 更新性能统计
+        function updatePerformanceStats(stat, value) {
+            const element = document.getElementById(stat);
+            if (element) {
+                element.textContent = value;
+            }
+        }
+
+        // 显示加载状态
+        function showLoading(loadingId) {
+            document.getElementById(loadingId).style.display = 'block';
+        }
+
+        // 隐藏加载状态
+        function hideLoading(loadingId) {
+            document.getElementById(loadingId).style.display = 'none';
+        }
+
+        // 显示结果
+        function showResult(resultId, content) {
+            const resultElement = document.getElementById(resultId);
+            resultElement.textContent = content;
+            resultElement.style.display = 'block';
+        }
+
+        // 运行基础示例
+        window.runBasicDemo = async function() {
+            if (!wasmModule) {
+                alert('WebAssembly模块未加载');
+                return;
+            }
+
+            const input = parseInt(document.getElementById('fibInput').value);
+            showLoading('basicLoading');
+
+            try {
+                const startTime = performance.now();
+                const result = fibonacci(input);
+                const endTime = performance.now();
+                
+                const executionTime = Math.round(endTime - startTime);
+                updatePerformanceStats('executionTime', executionTime);
+                
+                showResult('basicResult', `斐波那契数列第${input}项: ${result}\n执行时间: ${executionTime}ms`);
+            } catch (error) {
+                showResult('basicResult', `错误: ${error.message}`);
+            } finally {
+                hideLoading('basicLoading');
+            }
+        };
+
+        // 运行高级示例
+        window.runAdvancedDemo = async function() {
+            if (!wasmModule) {
+                alert('WebAssembly模块未加载');
+                return;
+            }
+
+            const matrixSize = parseInt(document.getElementById('matrixSize').value);
+            const iterations = parseInt(document.getElementById('iterations').value);
+            showLoading('advancedLoading');
+
+            try {
+                const startTime = performance.now();
+                const result = run_matrix_multiply_benchmark(matrixSize, iterations);
+                const endTime = performance.now();
+                
+                const executionTime = Math.round(endTime - startTime);
+                updatePerformanceStats('executionTime', executionTime);
+                
+                showResult('advancedResult', `矩阵乘法基准测试完成\n矩阵大小: ${matrixSize}x${matrixSize}\n迭代次数: ${iterations}\n执行时间: ${executionTime}ms\n结果: ${JSON.stringify(result, null, 2)}`);
+            } catch (error) {
+                showResult('advancedResult', `错误: ${error.message}`);
+            } finally {
+                hideLoading('advancedLoading');
+            }
+        };
+
+        // 运行性能示例
+        window.runPerformanceDemo = async function() {
+            if (!wasmModule) {
+                alert('WebAssembly模块未加载');
+                return;
+            }
+
+            const testType = document.getElementById('perfTest').value;
+            const size = parseInt(document.getElementById('perfSize').value);
+            showLoading('performanceLoading');
+
+            try {
+                const startTime = performance.now();
+                let result;
+                
+                switch (testType) {
+                    case 'fibonacci':
+                        result = fibonacci_fast(size);
+                        break;
+                    case 'matrix':
+                        result = run_matrix_multiply_benchmark(Math.sqrt(size), 10);
+                        break;
+                    case 'sorting':
+                        result = run_sorting_benchmark(size, 10);
+                        break;
+                    case 'simd':
+                        result = run_simd_benchmark(size, 100);
+                        break;
+                    default:
+                        throw new Error('未知的测试类型');
+                }
+                
+                const endTime = performance.now();
+                const executionTime = Math.round(endTime - startTime);
+                const throughput = Math.round(size / (executionTime / 1000));
+                
+                updatePerformanceStats('executionTime', executionTime);
+                updatePerformanceStats('throughput', throughput);
+                
+                showResult('performanceResult', `${testType} 性能测试完成\n数据大小: ${size}\n执行时间: ${executionTime}ms\n吞吐量: ${throughput} ops/s\n结果: ${JSON.stringify(result, null, 2)}`);
+            } catch (error) {
+                showResult('performanceResult', `错误: ${error.message}`);
+            } finally {
+                hideLoading('performanceLoading');
+            }
+        };
+
+        // 运行图像处理示例
+        window.runImageDemo = async function() {
+            if (!wasmModule) {
+                alert('WebAssembly模块未加载');
+                return;
+            }
+
+            const filterType = document.getElementById('imageFilter').value;
+            const imageSize = parseInt(document.getElementById('imageSize').value);
+            showLoading('imageLoading');
+
+            try {
+                const startTime = performance.now();
+                const result = apply_image_filter(filterType, imageSize, imageSize);
+                const endTime = performance.now();
+                
+                const executionTime = Math.round(endTime - startTime);
+                updatePerformanceStats('executionTime', executionTime);
+                
+                showResult('imageResult', `图像处理完成\n滤镜类型: ${filterType}\n图像大小: ${imageSize}x${imageSize}\n执行时间: ${executionTime}ms\n结果: ${JSON.stringify(result, null, 2)}`);
+            } catch (error) {
+                showResult('imageResult', `错误: ${error.message}`);
+            } finally {
+                hideLoading('imageLoading');
+            }
+        };
+
+        // 更新内存使用统计
+        function updateMemoryStats() {
+            if (performance.memory) {
+                const memoryMB = Math.round(performance.memory.usedJSHeapSize / 1024 / 1024);
+                updatePerformanceStats('memoryUsage', memoryMB);
+            }
+        }
+
+        // 初始化应用
+        async function initApp() {
+            await initWasm();
+            updateMemoryStats();
+            
+            // 定期更新内存统计
+            setInterval(updateMemoryStats, 1000);
+        }
+
+        // 启动应用
+        initApp();
+    </script>
+</body>
+</html>

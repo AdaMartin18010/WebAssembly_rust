@@ -1,0 +1,44 @@
+[package]
+name = "advanced"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.90"
+resolver = "3"
+
+[dependencies]
+wasm-bindgen = "0.2.104"
+wasm-bindgen-futures = "0.4.53"
+web-sys = { version = "0.3.80", features = [
+    "console",
+    "Window",
+    "Document",
+    "Element",
+    "HtmlElement",
+    "CanvasRenderingContext2d",
+    "HtmlCanvasElement",
+    "ImageData",
+    "EventTarget",
+    "Event",
+    "MouseEvent",
+    "KeyboardEvent",
+    "WebGlRenderingContext",
+    "WebGl2RenderingContext",
+    "Request",
+    "RequestInit",
+    "RequestMode",
+    "Response",
+    "Headers",
+    "AbortController",
+    "AbortSignal",
+] }
+js-sys = "0.3.80"
+serde = { version = "1.0.228", features = ["derive"] }
+serde-wasm-bindgen = "0.6.3"
+console_error_panic_hook = "0.1.7"
+wee_alloc = { version = "0.4.5", optional = true }
+wasm = { path = "../../wasm" }
+
+[features]
+default = ["console_error_panic_hook"]
+console_error_panic_hook = []
+wee_alloc = ["dep:wee_alloc"]

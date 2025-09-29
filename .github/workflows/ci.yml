@@ -1,0 +1,380 @@
+name: WebAssembly 2.0 + Rust 1.90 CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  release:
+    types: [ published ]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  # 代码质量检查
+  quality:
+    name: 代码质量检查
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          components: rustfmt, clippy
+          override: true
+
+      - name: 缓存Cargo依赖
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: 代码格式化检查
+        run: cargo fmt --all -- --check
+
+      - name: 代码质量检查
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+      - name: 安全审计
+        run: |
+          cargo install cargo-audit
+          cargo audit
+
+  # 构建测试
+  build:
+    name: 构建测试
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        target: [wasm32-unknown-unknown]
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: ${{ matrix.target }}
+          override: true
+
+      - name: 安装wasm-pack
+        run: |
+          curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+      - name: 缓存Cargo依赖
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: 构建项目
+        run: |
+          cargo build --workspace --target ${{ matrix.target }}
+
+      - name: 构建WebAssembly模块
+        run: |
+          wasm-pack build --target web --out-dir pkg wasm
+          wasm-pack build --target web --out-dir pkg/basic examples/basic
+          wasm-pack build --target web --out-dir pkg/advanced examples/advanced
+          wasm-pack build --target web --out-dir pkg/performance examples/performance
+
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v3
+        with:
+          name: wasm-modules-${{ matrix.os }}
+          path: pkg/
+
+  # 单元测试
+  test:
+    name: 单元测试
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: 缓存Cargo依赖
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: 运行单元测试
+        run: cargo test --workspace
+
+      - name: 运行集成测试
+        run: cargo test --package integration
+
+      - name: 生成测试覆盖率报告
+        run: |
+          cargo install cargo-tarpaulin
+          cargo tarpaulin --out Html --output-dir coverage
+        continue-on-error: true
+
+      - name: 上传覆盖率报告
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: coverage-report-${{ matrix.os }}
+          path: coverage/
+
+  # WebAssembly测试
+  wasm-test:
+    name: WebAssembly测试
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: wasm32-unknown-unknown
+          override: true
+
+      - name: 安装wasm-pack
+        run: |
+          curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+      - name: 安装Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: 缓存依赖
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+            node_modules
+          key: ${{ runner.os }}-wasm-test-${{ hashFiles('**/Cargo.lock', '**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-wasm-test-
+
+      - name: 构建WebAssembly模块
+        run: |
+          wasm-pack build --target web --out-dir pkg wasm
+          wasm-pack build --target web --out-dir pkg/basic examples/basic
+          wasm-pack build --target web --out-dir pkg/advanced examples/advanced
+          wasm-pack build --target web --out-dir pkg/performance examples/performance
+
+      - name: 运行WebAssembly测试
+        run: |
+          wasm-pack test --headless --firefox
+          wasm-pack test --headless --chrome
+
+  # 性能基准测试
+  benchmark:
+    name: 性能基准测试
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: 缓存Cargo依赖
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: 运行基准测试
+        run: |
+          cargo install cargo-criterion
+          cargo bench --workspace
+
+      - name: 上传基准测试结果
+        uses: actions/upload-artifact@v3
+        with:
+          name: benchmark-results
+          path: target/criterion/
+
+  # 文档生成
+  docs:
+    name: 文档生成
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: 缓存Cargo依赖
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: 生成API文档
+        run: |
+          cargo doc --workspace --no-deps
+          cargo doc --workspace --document-private-items
+
+      - name: 部署文档到GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        if: github.ref == 'refs/heads/main'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./target/doc
+
+  # 安全扫描
+  security:
+    name: 安全扫描
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: 缓存Cargo依赖
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: 运行安全审计
+        run: |
+          cargo install cargo-audit
+          cargo audit
+
+      - name: 运行依赖检查
+        run: |
+          cargo install cargo-deny
+          cargo deny check
+
+      - name: 运行Trivy安全扫描
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: 上传Trivy扫描结果
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # 发布
+  release:
+    name: 发布
+    runs-on: ubuntu-latest
+    needs: [quality, build, test, wasm-test]
+    if: github.event_name == 'release'
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: wasm32-unknown-unknown
+          override: true
+
+      - name: 安装wasm-pack
+        run: |
+          curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+      - name: 构建发布版本
+        run: |
+          wasm-pack build --target web --out-dir pkg --release wasm
+          wasm-pack build --target web --out-dir pkg/basic --release examples/basic
+          wasm-pack build --target web --out-dir pkg/advanced --release examples/advanced
+          wasm-pack build --target web --out-dir pkg/performance --release examples/performance
+
+      - name: 优化WebAssembly文件
+        run: |
+          cargo install wasm-opt
+          wasm-opt -Os pkg/wasm_bg.wasm -o pkg/wasm_bg.wasm
+          wasm-opt -Os pkg/basic/basic_bg.wasm -o pkg/basic/basic_bg.wasm
+          wasm-opt -Os pkg/advanced/advanced_bg.wasm -o pkg/advanced/advanced_bg.wasm
+          wasm-opt -Os pkg/performance/performance_bg.wasm -o pkg/performance/performance_bg.wasm
+
+      - name: 创建发布包
+        run: |
+          tar -czf wasm-rust-${{ github.event.release.tag_name }}.tar.gz pkg/
+          zip -r wasm-rust-${{ github.event.release.tag_name }}.zip pkg/
+
+      - name: 上传发布包
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./wasm-rust-${{ github.event.release.tag_name }}.tar.gz
+          asset_name: wasm-rust-${{ github.event.release.tag_name }}.tar.gz
+          asset_content_type: application/gzip
+
+      - name: 上传ZIP发布包
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./wasm-rust-${{ github.event.release.tag_name }}.zip
+          asset_name: wasm-rust-${{ github.event.release.tag_name }}.zip
+          asset_content_type: application/zip

@@ -1,0 +1,28 @@
+[package]
+name = "basic"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.90"
+
+[dependencies]
+wasm-bindgen = "0.2.104"
+web-sys = { version = "0.3.80", features = [
+    "console",
+    "Window",
+    "Document",
+    "Element",
+    "HtmlElement",
+    "EventTarget",
+    "Event",
+] }
+js-sys = "0.3.80"
+serde = { version = "1.0.228", features = ["derive"] }
+serde-wasm-bindgen = "0.6.3"
+wasm = { path = "../../wasm" }
+console_error_panic_hook = "0.1.7"
+wee_alloc = { version = "0.4.5", optional = true }
+
+[features]
+default = ["console_error_panic_hook"]
+console_error_panic_hook = []
+wee_alloc = ["dep:wee_alloc"]

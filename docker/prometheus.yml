@@ -1,0 +1,67 @@
+# WebAssembly 2.0 + Rust 1.90 Prometheus配置
+# 监控和指标收集
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - "rules/*.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+scrape_configs:
+  # Prometheus自身监控
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # WebAssembly应用监控
+  - job_name: 'wasm-app'
+    static_configs:
+      - targets: ['wasm-prod:8080', 'wasm-microservice:8080', 'wasm-edge:8080']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+
+  # Nginx监控
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx-lb:80']
+    metrics_path: '/nginx_status'
+    scrape_interval: 15s
+
+  # Node Exporter系统监控
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 15s
+
+  # PostgreSQL监控
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres:5432']
+    scrape_interval: 30s
+
+  # Redis监控
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+    scrape_interval: 30s
+
+  # Docker监控
+  - job_name: 'docker'
+    static_configs:
+      - targets: ['docker-exporter:9323']
+    scrape_interval: 30s
+
+  # 健康检查
+  - job_name: 'health-check'
+    static_configs:
+      - targets: ['wasm-prod:8080', 'wasm-microservice:8080', 'wasm-edge:8080']
+    metrics_path: '/health'
+    scrape_interval: 30s

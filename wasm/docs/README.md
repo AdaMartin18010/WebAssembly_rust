@@ -50,6 +50,10 @@ c16_webassembly 是一个基于 Rust 1.89 特性的 WebAssembly 2.0 集成项目
 - [🔒 安全工具集](./tools/security/README.md) - WebAssembly安全分析和防护工具
 - [⚡ 优化工具集](./tools/optimization/README.md) - WebAssembly性能优化工具
 
+### 📚 开源库集合
+
+- [📦 WebAssembly开源库集合](./libraries/README.md) - 完整的WebAssembly生态系统库介绍
+
 ### 📖 示例代码
 
 - [🦀 Rust 1.90新特性示例](./examples/rust_190/README.md) - Rust 1.90新特性在WebAssembly中的应用
