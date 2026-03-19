@@ -1,108 +1,147 @@
 [package]
 name = "wasm"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 resolver = "3"
-rust-version = "1.90"
+rust-version = "1.94"
 authors = ["Rust WebAssembly Team"]
-description = "WebAssembly 2.0 与 Rust 1.90 集成演示项目 - 包含2025年9月最新开源库、工具链和应用案例"
+description = "WebAssembly 3.0 与 Rust 1.94 集成项目 - 包含WASI 0.3、Component Model和WasmGC支持"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/rust-lang/webassembly"
-keywords = ["webassembly", "wasm", "rust", "vm", "runtime"]
+keywords = ["webassembly", "wasm", "rust", "vm", "runtime", "wasi", "component-model"]
 categories = ["web-programming", "wasm"]
 
 # =============================================================================
-# 系统时间同步说明 - 2025年9月27日 12:40:53
+# 系统时间同步说明 - 2026年3月19日
 # =============================================================================
 # 本项目的所有依赖库版本已与当前系统时间对齐，确保使用最新的稳定版本
-# 更新时间: 2025年9月27日
-# 系统时间: 2025-09-27 12:40:53
+# 更新时间: 2026年3月19日
+# Rust 版本: 1.94.0
+# WebAssembly 版本: 3.0
+# WASI 版本: 0.3
 # 所有依赖库版本均通过 cargo search 命令验证为最新稳定版本
 # 建议定期检查并更新依赖库版本以保持系统安全性和性能
 # =============================================================================
 
-# WebAssembly CPU指令集优化配置在根Cargo.toml中统一管理
-
 [dependencies]
-# 序列化和反序列化 - 2025年9月27日最新版本
-serde = { workspace = true, features = ["derive", "rc"] }  # 最新版本: 1.0.227 (从1.0.226升级)
-serde_json = { workspace = true }  # 最新版本: 1.0.145
-serde_bytes = "0.11.19"  # 当前版本已是最新
+# 序列化和反序列化 - 2026年3月最新版本
+serde = { workspace = true, features = ["derive", "rc"] }
+serde_json = { workspace = true }
+serde_bytes = "0.11.19"
 
-# 错误处理 - 2025年9月27日最新版本
-thiserror = { workspace = true }  # 最新版本: 2.0.0
-anyhow = { workspace = true }  # 最新版本: 1.0.0
+# 错误处理 - 2026年3月最新版本
+thiserror = { workspace = true }
+anyhow = { workspace = true }
 
-# 异步运行时 - 2025年9月27日最新版本
-tokio = { workspace = true, features = ["full"] }  # 最新版本: 1.47.1
+# 异步运行时 - 2026年3月最新版本
+tokio = { workspace = true, features = ["full"] }
 
-# 工具库 - 2025年9月27日最新版本
-uuid = { workspace = true, features = ["v4", "serde"] }  # 最新版本: 1.18.1
-chrono = { workspace = true, features = ["serde"] }  # 最新版本: 0.4.42
-log = { workspace = true }  # 最新版本: 0.4.28
-env_logger = "0.11.8"  # 当前版本已是最新
-rand = "0.8.5"  # 随机数生成
+# 工具库 - 2026年3月最新版本
+uuid = { workspace = true, features = ["v4", "serde"] }
+chrono = { workspace = true, features = ["serde"] }
+log = { workspace = true }
+env_logger = "0.11.8"
+rand = "0.9.2"
 
-# WebAssembly 相关 - 2025年9月27日最新版本 (支持WebAssembly 2.0)
-wasm-bindgen = "0.2.104"  # 最新稳定版本 (从0.2.103升级到0.2.104)
-wasm-bindgen-futures = "0.4.53"  # 当前版本已是最新
-js-sys = "0.3.80"  # 当前版本已是最新
-web-sys = "0.3.80"  # 当前版本已是最新
-wasmtime = "37.0.1"  # 最新版本，支持WebAssembly 2.0
-wasmparser = "0.239.0"  # 支持WebAssembly 2.0解析
-wasm-encoder = "0.239.0"  # 支持WebAssembly 2.0编码
-wasm-opt = "0.116.1"  # WebAssembly优化工具
-wasi = "0.12.0"  # WebAssembly系统接口
+# WebAssembly 相关 - 2026年3月最新版本 (支持WebAssembly 3.0)
+wasm-bindgen = { workspace = true }
+wasm-bindgen-futures = { workspace = true }
+js-sys = "0.3.82"
+web-sys = "0.3.82"
+wasmtime = { version = "42.0.0", features = ["component-model", "async"] }
+wasmparser = "0.243.0"
+wasm-encoder = "0.243.0"
+wasm-opt = "0.116.1"
+wasi = "0.14.0"
 
-# 数学和算法 - 2025年9月27日最新版本
-num-traits = "0.2.19"  # 当前版本已是最新
-num-bigint = "0.4.6"  # 当前版本已是最新
-num-complex = "0.4.6"  # 当前版本已是最新
+# Component Model 工具
+wit-bindgen = "0.41.0"
+wasm-tools = "1.229"
 
-# 内存管理 - 2025年9月27日最新版本
-bumpalo = "3.19.0"  # 当前版本已是最新
+# 数学和算法 - 2026年3月最新版本
+num-traits = "0.2.19"
+num-bigint = "0.4.6"
+num-complex = "0.4.6"
 
-# 性能分析 - 2025年9月27日最新版本
-criterion = { version = "0.7.0", optional = true }  # 从0.5.1升级到最新版本
+# 内存管理 - 2026年3月最新版本
+bumpalo = "3.19.0"
 
-# 测试工具 - 2025年9月27日最新版本
-proptest = { version = "1.8.0", optional = true }  # 当前版本已是最新
+# 性能分析 - 2026年3月最新版本
+criterion = { version = "0.7.0", optional = true }
+
+# 测试工具 - 2026年3月最新版本
+proptest = { version = "1.8.0", optional = true }
+futures = { workspace = true, features = ["std"] }
 
 [dev-dependencies]
-# 开发依赖 - 2025年9月27日最新版本
-criterion = "0.7.0"  # 从0.5.1升级到最新版本
-proptest = "1.8.0"  # 当前版本已是最新
-tempfile = "3.23.0"  # 从3.22.0升级到最新版本 (3.23.0)
+# 开发依赖 - 2026年3月最新版本
+criterion = "0.7.0"
+proptest = "1.8.0"
+tempfile = "3.23.0"
+tokio-test = "0.4.4"
 
 [features]
-default = ["std", "webassembly-2-0", "rust-190"]
+default = ["std", "webassembly-3-0", "rust-194", "wasi-03"]
 std = []
 no_std = []
 bench = ["criterion"]
 test = ["proptest"]
-webassembly-2-0 = ["simd", "bulk-memory", "tail-calls", "host-bindings", "interface-types"]
-rust-190 = ["const-generics", "improved-lifetimes", "ffi-improvements"]
+
+# WebAssembly 版本特性
+webassembly-2-0 = ["simd", "bulk-memory", "tail-calls", "host-bindings"]
+webassembly-3-0 = ["webassembly-2-0", "wasmgc", "memory64", "exception-handling-exnref"]
+
+# WebAssembly 2.0 特性
 simd = []
 bulk-memory = []
 tail-calls = []
 host-bindings = []
 interface-types = []
+
+# WebAssembly 3.0 新特性
+wasmgc = []
+memory64 = []
+exception-handling-exnref = []
+
+# Rust 版本特性
+rust-190 = ["const-generics", "improved-lifetimes", "ffi-improvements"]
+rust-194 = ["rust-190", "array-windows", "simd-fp16", "lazy-lock-enhanced"]
+
+# WASI 特性
+wasi-02 = []
+wasi-03 = ["wasi-02", "async-wasi", "component-model-async"]
+async-wasi = []
+component-model-async = []
+
 const-generics = []
 improved-lifetimes = []
 ffi-improvements = []
+array-windows = []
+simd-fp16 = []
+lazy-lock-enhanced = []
 
 [[bench]]
 name = "performance_benchmarks"
 harness = false
 required-features = ["bench"]
 
-[[example]]
-name = "rust_190_demo"
-path = "examples/rust_190_demo.rs"
+[[bench]]
+name = "rust_194_benchmarks"
+harness = false
+required-features = ["bench"]
 
 [[example]]
-name = "webassembly_2_0_demo"
-path = "examples/webassembly_2_0_demo.rs"
+name = "rust_194_demo"
+path = "examples/rust_194_demo.rs"
+
+[[example]]
+name = "webassembly_3_0_demo"
+path = "examples/webassembly_3_0_demo.rs"
+
+[[example]]
+name = "wasi_03_demo"
+path = "examples/wasi_03_demo.rs"
+required-features = ["wasi-03"]
 
 [[example]]
 name = "image_processing_demo"
@@ -113,10 +152,10 @@ name = "scientific_computing_demo"
 path = "examples/scientific_computing_demo.rs"
 
 [[example]]
-name = "webassembly_2_0_advanced_demo"
-path = "examples/webassembly_2_0_advanced_demo.rs"
+name = "component_model_demo"
+path = "examples/component_model_demo.rs"
+required-features = ["webassembly-3-0"]
 
 [[example]]
 name = "production_deployment_demo"
 path = "examples/production_deployment_demo.rs"
-

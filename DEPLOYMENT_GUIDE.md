@@ -275,7 +275,7 @@ scrape_configs:
       <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
     </encoder>
   </appender>
-  
+
   <root level="INFO">
     <appender-ref ref="STDOUT" />
   </root>
@@ -291,7 +291,7 @@ scrape_configs:
 server {
     listen 443 ssl http2;
     server_name your-domain.com;
-    
+
     ssl_certificate /etc/ssl/certs/cert.pem;
     ssl_certificate_key /etc/ssl/private/key.pem;
     ssl_protocols TLSv1.2 TLSv1.3;

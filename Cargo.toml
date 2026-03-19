@@ -12,11 +12,11 @@ members = [
 
 [workspace.package]
 edition = "2024"
-rust-version = "1.90"
+rust-version = "1.94"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/rust-lang/webassembly"
-description = "WebAssembly 2.0 + Rust 1.90 完整集成项目"
-keywords = ["webassembly", "wasm", "rust", "performance", "security"]
+description = "WebAssembly 3.0 + Rust 1.94 完整集成项目 - 包含WASI 0.3和Component Model支持"
+keywords = ["webassembly", "wasm", "rust", "performance", "security", "wasi", "component-model"]
 categories = ["web-programming", "wasm", "development-tools"]
 
 [profile.release]
@@ -134,11 +134,11 @@ actix-rt = "2.11.0"
 # crossterm: 跨平台终端操作库，支持Windows、macOS和Linux
 crossterm = "0.29.0"
 
-# 2025年9月27日最新前端框架 - 跨平台UI (移除GTK3依赖)
-# dioxus: 基于React的Rust前端框架，支持Web和桌面应用
+# 2026年最新前端框架 - 跨平台UI
 dioxus = "0.6.3"
-# dioxus-web: dioxus的Web后端支持
 dioxus-web = "0.6.3"
+# wasm-bindgen-futures: 最新版本
+wasm-bindgen-futures = "0.4.55"
 # dioxus-desktop: dioxus的桌面应用支持 (暂时禁用，存在GTK3安全漏洞)
 # dioxus-desktop = "0.6.0"  # 暂时禁用，存在GTK3安全漏洞
 # leptos: 现代Rust前端框架，支持SSR和客户端渲染
@@ -226,7 +226,7 @@ bincode = "1.3.3"
 
 # 异步运行时 - 2025年9月27日最新稳定版本
 # tokio: 异步运行时，提供事件循环、任务调度和I/O操作
-tokio = { version = "1.47.1", features = ["full"] }
+tokio = { version = "1.47.1", features = ["full", "tracing"] }
 # tokio-util: tokio的实用工具库
 tokio-util = "0.7.16"
 # tokio-stream: tokio的流处理支持
@@ -255,7 +255,7 @@ metrics = "0.24.2"
 metrics-exporter-prometheus = "0.17.2"
 
 # 时间处理 - 2025年9月27日最新稳定版本
-chrono = { version = "0.4.42", features = ["serde"] }
+chrono = { version = "0.4.44", features = ["serde"] }
 time = { version = "0.3.44", features = ["serde", "macros"] }
 
 # 其他常用库 - 2025年9月27日最新稳定版本
