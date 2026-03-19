@@ -35,6 +35,12 @@ pub struct DeveloperToolsManager {
     pub project_manager: ProjectManager,
 }
 
+impl Default for DeveloperToolsManager {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl DeveloperToolsManager {
     /// 创建新的开发工具管理器
     /// Create new developer tools manager
@@ -96,6 +102,12 @@ pub struct CodeGenerator {
     pub template_engine: TemplateEngine,
     /// 代码风格配置
     pub code_style: CodeStyle,
+}
+
+impl Default for CodeGenerator {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl CodeGenerator {
@@ -472,6 +484,12 @@ pub struct TemplateEngine {
     pub templates: HashMap<String, String>,
 }
 
+impl Default for TemplateEngine {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl TemplateEngine {
     /// 创建新的模板引擎
     /// Create new template engine
@@ -508,10 +526,10 @@ impl TemplateEngine {
 
     /// 渲染模板
     /// Render template
-    pub fn render_template<T: Serialize>(&self, template: &String, data: &T) -> Result<String, DeveloperToolsError> {
+    pub fn render_template<T: Serialize>(&self, template: &str, data: &T) -> Result<String, DeveloperToolsError> {
         // 简单的模板渲染实现
         // 实际应用中应该使用更强大的模板引擎如 Handlebars
-        let template_str = template.clone();
+        let template_str = template.to_owned();
         let data_json = serde_json::to_string(data)
             .map_err(|e| DeveloperToolsError::SerializationError(e.to_string()))?;
         
@@ -563,6 +581,12 @@ pub struct WasmDebugger {
     pub debug_sessions: HashMap<String, DebugSession>,
     /// 调试配置
     pub debug_config: DebugConfiguration,
+}
+
+impl Default for WasmDebugger {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl WasmDebugger {
@@ -737,6 +761,12 @@ pub struct WasmProfiler {
     pub analysis_config: AnalysisConfiguration,
 }
 
+impl Default for WasmProfiler {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl WasmProfiler {
     /// 创建新的性能分析器
     /// Create new profiler
@@ -806,7 +836,7 @@ impl WasmProfiler {
         let mut recommendations = Vec::new();
         
         // 分析函数调用数据
-        for (_, call_data) in &data.function_calls {
+        for call_data in data.function_calls.values() {
             if call_data.average_time > Duration::from_millis(100) {
                 recommendations.push(OptimizationRecommendation {
                     recommendation_type: OptimizationType::Performance,
@@ -987,6 +1017,12 @@ pub struct WasmTestFramework {
     pub test_config: TestConfiguration,
 }
 
+impl Default for WasmTestFramework {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl WasmTestFramework {
     /// 创建新的测试框架
     /// Create new test framework
@@ -1077,7 +1113,7 @@ impl WasmTestFramework {
             test_name: test_case.name.clone(),
             passed,
             execution_time,
-            expected_output: test_case.expected_output.clone(),
+            expected_output: test_case.expected_output,
             actual_output,
             error_message: if passed { None } else { Some("Test failed".to_string()) },
         })
@@ -1167,6 +1203,12 @@ pub struct DocGenerator {
     pub doc_config: DocumentationConfiguration,
 }
 
+impl Default for DocGenerator {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl DocGenerator {
     /// 创建新的文档生成器
     /// Create new documentation generator
@@ -1211,7 +1253,7 @@ impl DocGenerator {
         for feature in &module.features {
             doc.push_str(&format!("- {:?}\n", feature));
         }
-        doc.push_str("\n");
+        doc.push('\n');
         
         // 添加函数文档
         doc.push_str("## 函数列表\n\n");
@@ -1225,7 +1267,7 @@ impl DocGenerator {
                 for (i, param_type) in function.params.iter().enumerate() {
                     doc.push_str(&format!("- 参数 {}: {:?}\n", i, param_type));
                 }
-                doc.push_str("\n");
+                doc.push('\n');
             }
             
             // 返回值
@@ -1234,7 +1276,7 @@ impl DocGenerator {
                 for (i, result_type) in function.results.iter().enumerate() {
                     doc.push_str(&format!("- 返回值 {}: {:?}\n", i, result_type));
                 }
-                doc.push_str("\n");
+                doc.push('\n');
             }
         }
         
@@ -1305,6 +1347,12 @@ pub struct ProjectManager {
     pub project_config: ProjectConfiguration,
 }
 
+impl Default for ProjectManager {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ProjectManager {
     /// 创建新的项目管理器
     /// Create new project manager
@@ -1330,7 +1378,7 @@ impl ProjectManager {
     /// Initialize project
     pub fn initialize_project(&self, project_name: String) -> Result<(), DeveloperToolsError> {
         let project_path = self.project_path.as_ref()
-            .ok_or_else(|| DeveloperToolsError::ProjectPathNotSet)?;
+            .ok_or(DeveloperToolsError::ProjectPathNotSet)?;
 
         // 创建 Cargo.toml
         let cargo_toml = self.create_cargo_toml(&project_name);

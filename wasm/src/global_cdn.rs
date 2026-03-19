@@ -871,6 +871,12 @@ impl GlobalCdnManager {
     }
 }
 
+impl Default for ContentDistributor {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ContentDistributor {
     /// 创建新的内容分发器
     pub fn new() -> Self {
@@ -884,7 +890,7 @@ impl ContentDistributor {
 
     /// 分发内容
     pub fn distribute_content(&self, content_id: String, source_node: String, target_nodes: Vec<String>) -> Result<String, CdnError> {
-        let task_id = format!("task_{}", rand::thread_rng().r#gen::<u64>());
+        let task_id = format!("task_{}", rand::rng().random::<u64>());
         
         for target_node in target_nodes {
             let task = DistributionTask {
@@ -903,6 +909,12 @@ impl ContentDistributor {
         }
         
         Ok(task_id)
+    }
+}
+
+impl Default for CdnCacheManager {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -988,6 +1000,12 @@ impl CdnCacheManager {
     }
 }
 
+impl Default for CdnLoadBalancer {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl CdnLoadBalancer {
     /// 创建新的 CDN 负载均衡器
     pub fn new() -> Self {
@@ -996,6 +1014,12 @@ impl CdnLoadBalancer {
             node_weights: Arc::new(Mutex::new(HashMap::new())),
             load_monitor: LoadMonitor::new(),
         }
+    }
+}
+
+impl Default for LoadMonitor {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -1013,6 +1037,12 @@ impl LoadMonitor {
                 overall_load_threshold: 80.0,
             },
         }
+    }
+}
+
+impl Default for CdnMonitoringSystem {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -1035,6 +1065,12 @@ impl CdnMonitoringSystem {
             monitoring_data: Arc::new(Mutex::new(Vec::new())),
             alert_system: AlertSystem::new(),
         }
+    }
+}
+
+impl Default for AlertSystem {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

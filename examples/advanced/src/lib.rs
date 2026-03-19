@@ -166,10 +166,9 @@ mod main {
                     let mut g = 0i32;
                     let mut b = 0i32;
                     
-                    for ky in 0..3 {
-                        for kx in 0..3 {
+                    for (ky, kernel_row) in kernel.iter().enumerate() {
+                        for (kx, &weight) in kernel_row.iter().enumerate() {
                             let idx = ((y + ky - 1) * width + (x + kx - 1)) * 4;
-                            let weight = kernel[ky][kx];
                             
                             r += (self.data[idx] as i32) * weight;
                             g += (self.data[idx + 1] as i32) * weight;
@@ -178,9 +177,9 @@ mod main {
                     }
                     
                     let idx = (y * width + x) * 4;
-                    new_data[idx] = r.max(0).min(255) as u8;
-                    new_data[idx + 1] = g.max(0).min(255) as u8;
-                    new_data[idx + 2] = b.max(0).min(255) as u8;
+                    new_data[idx] = r.clamp(0, 255) as u8;
+                    new_data[idx + 1] = g.clamp(0, 255) as u8;
+                    new_data[idx + 2] = b.clamp(0, 255) as u8;
                 }
             }
             
@@ -240,6 +239,7 @@ mod main {
 
     // 高级数学计算器
     #[wasm_bindgen]
+    #[derive(Default)]
     pub struct MathCalculator {
         memory: HashMap<String, f64>,
     }
@@ -248,9 +248,7 @@ mod main {
     impl MathCalculator {
         #[wasm_bindgen(constructor)]
         pub fn new() -> MathCalculator {
-            MathCalculator {
-                memory: HashMap::new(),
-            }
+            Self::default()
         }
 
         #[wasm_bindgen]

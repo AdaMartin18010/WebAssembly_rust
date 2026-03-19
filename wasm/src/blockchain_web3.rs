@@ -708,6 +708,12 @@ impl BlockchainManager {
     }
 }
 
+impl Default for SmartContractManager {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SmartContractManager {
     /// 创建新的智能合约管理器
     pub fn new() -> Self {
@@ -721,7 +727,7 @@ impl SmartContractManager {
     /// 部署合约
     pub fn deploy_contract(&self, request: DeploymentRequest) -> Result<String, BlockchainError> {
         // 简化的合约部署实现
-        let contract_address = format!("0x{:040x}", rand::thread_rng().r#gen::<u64>());
+        let contract_address = format!("0x{:040x}", rand::rng().random::<u64>());
         
         let contract = SmartContract {
             address: contract_address.clone(),
@@ -745,8 +751,14 @@ impl SmartContractManager {
     #[allow(unused_variables)]
     pub fn call_contract(&self, call: ContractCall) -> Result<String, BlockchainError> {
         // 简化的合约调用实现
-        let result = format!("0x{:064x}", rand::thread_rng().r#gen::<u64>());
+        let result = format!("0x{:064x}", rand::rng().random::<u64>());
         Ok(result)
+    }
+}
+
+impl Default for ContractDeployer {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -760,6 +772,12 @@ impl ContractDeployer {
     }
 }
 
+impl Default for ContractCaller {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ContractCaller {
     /// 创建新的合约调用器
     pub fn new() -> Self {
@@ -767,6 +785,12 @@ impl ContractCaller {
             call_queue: Arc::new(Mutex::new(VecDeque::new())),
             call_history: Arc::new(Mutex::new(Vec::new())),
         }
+    }
+}
+
+impl Default for WalletManager {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -783,8 +807,8 @@ impl WalletManager {
     /// 创建钱包
     #[allow(unused_variables)]
     pub fn create_wallet(&self, name: String, wallet_type: WalletType) -> Result<Wallet, BlockchainError> {
-        let wallet_id = format!("wallet_{}", rand::thread_rng().r#gen::<u64>());
-        let address = format!("0x{:040x}", rand::thread_rng().r#gen::<u64>());
+        let wallet_id = format!("wallet_{}", rand::rng().random::<u64>());
+        let address = format!("0x{:040x}", rand::rng().random::<u64>());
         
         let wallet = Wallet {
             id: wallet_id,
@@ -803,6 +827,12 @@ impl WalletManager {
     }
 }
 
+impl Default for KeyManager {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl KeyManager {
     /// 创建新的密钥管理器
     pub fn new() -> Self {
@@ -810,6 +840,12 @@ impl KeyManager {
             key_storage: Arc::new(Mutex::new(HashMap::new())),
             encryptor: Encryptor::new(),
         }
+    }
+}
+
+impl Default for Encryptor {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -823,12 +859,24 @@ impl Encryptor {
     }
 }
 
+impl Default for Signer {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Signer {
     /// 创建新的签名器
     pub fn new() -> Self {
         Self {
             signature_algorithm: SignatureAlgorithm::EcdsaSecp256k1,
         }
+    }
+}
+
+impl Default for TransactionManager {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -848,6 +896,12 @@ impl TransactionManager {
         pool.push_back(transaction.clone());
         
         Ok(transaction.hash)
+    }
+}
+
+impl Default for TransactionMonitor {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

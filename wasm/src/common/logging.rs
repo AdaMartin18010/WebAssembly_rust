@@ -40,7 +40,7 @@ impl LogLevel {
     }
     
     /// 从字符串解析 / Parse from string
-    pub fn from_str(s: &str) -> Option<Self> {
+    pub fn parse_from(s: &str) -> Option<Self> {
         match s.to_uppercase().as_str() {
             "TRACE" => Some(LogLevel::Trace),
             "DEBUG" => Some(LogLevel::Debug),
@@ -471,7 +471,7 @@ impl Default for GlobalLogger {
 #[macro_export]
 macro_rules! log_trace {
     ($($arg:tt)*) => {
-        if let Some(logger) = crate::common::logging::get_global_logger() {
+        if let Some(logger) = $crate::common::logging::get_global_logger() {
             logger.trace(format!($($arg)*));
         }
     };
@@ -480,7 +480,7 @@ macro_rules! log_trace {
 #[macro_export]
 macro_rules! log_debug {
     ($($arg:tt)*) => {
-        if let Some(logger) = crate::common::logging::get_global_logger() {
+        if let Some(logger) = $crate::common::logging::get_global_logger() {
             logger.debug(format!($($arg)*));
         }
     };
@@ -489,7 +489,7 @@ macro_rules! log_debug {
 #[macro_export]
 macro_rules! log_info {
     ($($arg:tt)*) => {
-        if let Some(logger) = crate::common::logging::get_global_logger() {
+        if let Some(logger) = $crate::common::logging::get_global_logger() {
             logger.info(format!($($arg)*));
         }
     };
@@ -498,7 +498,7 @@ macro_rules! log_info {
 #[macro_export]
 macro_rules! log_warn {
     ($($arg:tt)*) => {
-        if let Some(logger) = crate::common::logging::get_global_logger() {
+        if let Some(logger) = $crate::common::logging::get_global_logger() {
             logger.warn(format!($($arg)*));
         }
     };
@@ -507,7 +507,7 @@ macro_rules! log_warn {
 #[macro_export]
 macro_rules! log_error {
     ($($arg:tt)*) => {
-        if let Some(logger) = crate::common::logging::get_global_logger() {
+        if let Some(logger) = $crate::common::logging::get_global_logger() {
             logger.error(format!($($arg)*));
         }
     };
@@ -516,7 +516,7 @@ macro_rules! log_error {
 #[macro_export]
 macro_rules! log_fatal {
     ($($arg:tt)*) => {
-        if let Some(logger) = crate::common::logging::get_global_logger() {
+        if let Some(logger) = $crate::common::logging::get_global_logger() {
             logger.fatal(format!($($arg)*));
         }
     };
@@ -544,7 +544,7 @@ mod tests {
     #[test]
     fn test_log_level() {
         assert_eq!(LogLevel::Info.as_str(), "INFO");
-        assert_eq!(LogLevel::from_str("debug"), Some(LogLevel::Debug));
+        assert_eq!(LogLevel::parse_from("debug"), Some(LogLevel::Debug));
         assert!(LogLevel::Error > LogLevel::Info);
     }
     

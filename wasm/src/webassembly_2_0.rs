@@ -143,22 +143,22 @@ impl WebAssembly2Module {
     /// Validate feature compatibility
     fn validate_feature_compatibility(&self, errors: &mut Vec<ValidationError>) {
         // 检查特性依赖关系
-        if self.supports_feature(&WebAssembly2Features::TailCallOptimization) {
-            if !self.supports_feature(&WebAssembly2Features::MultiValue) {
-                errors.push(ValidationError::FeatureDependencyError {
-                    feature: "TailCallOptimization".to_string(),
-                    required: "MultiValue".to_string(),
-                });
-            }
+        if self.supports_feature(&WebAssembly2Features::TailCallOptimization)
+            && !self.supports_feature(&WebAssembly2Features::MultiValue)
+        {
+            errors.push(ValidationError::FeatureDependencyError {
+                feature: "TailCallOptimization".to_string(),
+                required: "MultiValue".to_string(),
+            });
         }
 
-        if self.supports_feature(&WebAssembly2Features::ExceptionHandling) {
-            if !self.supports_feature(&WebAssembly2Features::ReferenceTypes) {
-                errors.push(ValidationError::FeatureDependencyError {
-                    feature: "ExceptionHandling".to_string(),
-                    required: "ReferenceTypes".to_string(),
-                });
-            }
+        if self.supports_feature(&WebAssembly2Features::ExceptionHandling)
+            && !self.supports_feature(&WebAssembly2Features::ReferenceTypes)
+        {
+            errors.push(ValidationError::FeatureDependencyError {
+                feature: "ExceptionHandling".to_string(),
+                required: "ReferenceTypes".to_string(),
+            });
         }
     }
 }
@@ -418,11 +418,8 @@ impl ExceptionHandler {
 
         // 验证处理指令
         for instruction in &self.handler_instructions {
-            match instruction {
-                WebAssembly2Instruction::Throw(_) => {
-                    return Err(ValidationError::InvalidInstructionInHandler);
-                }
-                _ => {}
+            if let WebAssembly2Instruction::Throw(_) = instruction {
+                return Err(ValidationError::InvalidInstructionInHandler);
             }
         }
 
@@ -553,10 +550,8 @@ impl WebAssembly2Memory {
         }
 
         // 检查最大大小
-        if let Some(max) = self.maximum {
-            if max < self.initial {
-                return Err(ValidationError::InvalidMemorySize { size: max });
-            }
+        if let Some(max) = self.maximum && max < self.initial {
+            return Err(ValidationError::InvalidMemorySize { size: max });
         }
 
         // 检查共享内存
@@ -626,10 +621,8 @@ impl WebAssembly2Table {
         }
 
         // 检查最大大小
-        if let Some(max) = self.maximum {
-            if max < self.initial {
-                return Err(ValidationError::InvalidTableSize { size: max });
-            }
+        if let Some(max) = self.maximum && max < self.initial {
+            return Err(ValidationError::InvalidTableSize { size: max });
         }
 
         Ok(())
@@ -867,6 +860,12 @@ pub struct WebAssembly2Runtime {
     pub performance_stats: PerformanceStats,
 }
 
+impl Default for WebAssembly2Runtime {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl WebAssembly2Runtime {
     /// 创建新运行时
     /// Create new runtime
@@ -1006,6 +1005,12 @@ pub struct PerformanceStats {
     pub max_execution_time: Duration,
     /// 最小执行时间
     pub min_execution_time: Duration,
+}
+
+impl Default for PerformanceStats {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl PerformanceStats {

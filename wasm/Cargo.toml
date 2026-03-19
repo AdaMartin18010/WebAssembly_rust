@@ -55,8 +55,8 @@ wasm-opt = "0.116.1"
 wasi = "0.14.0"
 
 # Component Model 工具
-wit-bindgen = "0.41.0"
-wasm-tools = "1.229"
+wit-bindgen = "0.54.0"
+wasm-tools = "1.245.1"
 
 # 数学和算法 - 2026年3月最新版本
 num-traits = "0.2.19"

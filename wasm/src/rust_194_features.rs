@@ -7,7 +7,7 @@
 //! - AVX-512 FP16 / NEON FP16 SIMD
 //! - 新增数学常量 (EULER_GAMMA, GOLDEN_RATIO)
 //! - Peekable::next_if_map 增强
-//! - TryFrom<char> for usize
+//! - `TryFrom<char>` for usize
 
 use std::sync::LazyLock;
 use serde::{Deserialize, Serialize};
@@ -179,7 +179,7 @@ pub mod math_constants {
         let mut current = base;
         
         for _ in 0..iterations {
-            current = current / GOLDEN_RATIO;
+            current /= GOLDEN_RATIO;
             result.push(current);
         }
         
@@ -289,7 +289,7 @@ pub mod enhanced_iterators {
 }
 
 /// char 到 usize 的安全转换
-/// Rust 1.94: TryFrom<char> for usize 已稳定
+/// Rust 1.94: `TryFrom<char>` for usize 已稳定
 pub fn char_to_usize(c: char) -> Option<usize> {
     // 尝试将 char 转换为 usize
     // 这在解析 Unicode 字符编码时很有用
@@ -325,8 +325,16 @@ pub enum Rust194Error {
 
 /// 综合演示：Rust 1.94 所有新特性
 pub struct Rust194Demo {
+    #[allow(dead_code)]
     cache: &'static ModuleCache,
+    #[allow(dead_code)]
     config: &'static GlobalConfig,
+}
+
+impl Default for Rust194Demo {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl Rust194Demo {

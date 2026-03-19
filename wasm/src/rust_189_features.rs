@@ -41,6 +41,12 @@ impl<const N: usize> WasmArrayBuilder<N> {
     }
 }
 
+impl<const N: usize> Default for WasmArrayBuilder<N> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 /// WebAssembly 2.0 批量内存操作实现
 /// WebAssembly 2.0 bulk memory operations implementation
 pub struct BulkMemoryManager {
@@ -183,6 +189,12 @@ impl TailCallOptimizer {
     }
 }
 
+impl Default for TailCallOptimizer {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 /// WebAssembly 2.0 宿主绑定实现
 /// WebAssembly 2.0 host bindings implementation
 #[allow(dead_code)]
@@ -252,6 +264,12 @@ impl HostBindingManager {
     }
 }
 
+impl Default for HostBindingManager {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 /// WebAssembly 2.0 接口类型处理
 /// WebAssembly 2.0 interface type handling
 #[allow(dead_code)]
@@ -308,6 +326,12 @@ impl InterfaceTypeHandler {
     }
 }
 
+impl Default for InterfaceTypeHandler {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 /// Rust 1.89 FFI 改进示例
 /// Rust 1.89 FFI improvement examples
 #[allow(dead_code)]
@@ -328,6 +352,14 @@ pub mod ffi_examples {
 
     /// 调用外部 128 位整数函数
     /// Call external 128-bit integer functions
+    ///
+    /// # Safety
+    ///
+    /// This function is unsafe because it calls external C functions.
+    /// The caller must ensure that:
+    /// - The external functions `square_i128` and `square_u128` are properly linked
+    /// - The external functions do not violate memory safety
+    /// - The external functions follow the expected calling convention
     pub unsafe fn call_128bit_functions() -> Result<(i128, u128), RuntimeError> {
         let i128_input = 123456789012345678901234567890i128;
         let u128_input = 987654321098765432109876543210u128;
@@ -372,6 +404,7 @@ pub struct SimdProcessor {
 /// SIMD 指令
 /// SIMD instruction
 #[allow(dead_code)]
+#[allow(clippy::enum_variant_names)]
 #[derive(Debug, Clone)]
 pub enum SimdInstruction {
     /// 向量加法
@@ -523,6 +556,12 @@ impl SimdProcessor {
     }
 }
 
+impl Default for SimdProcessor {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 /// 综合示例：Rust 1.90 + WebAssembly 2.0
 /// Comprehensive example: Rust 1.90 + WebAssembly 2.0
 #[allow(dead_code)]
@@ -619,6 +658,12 @@ impl Rust190Wasm2Integration {
     }
 }
 
+impl Default for Rust190Wasm2Integration {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 /// 测试结果
 /// Test result
 #[derive(Debug, Clone)]
@@ -654,6 +699,12 @@ impl TestResult {
     /// Check if all successful
     pub fn is_all_success(&self) -> bool {
         self.errors.is_empty()
+    }
+}
+
+impl Default for TestResult {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -757,6 +808,12 @@ pub mod const_generics_advanced {
         }
     }
 
+    impl<const SIZE: usize> Default for WasmBuffer<SIZE> {
+        fn default() -> Self {
+            Self::new()
+        }
+    }
+
     /// 类型安全的 WebAssembly 函数表
     /// Type-safe WebAssembly function table
     pub struct WasmFunctionTable<const MAX_FUNCTIONS: usize> {
@@ -797,6 +854,12 @@ pub mod const_generics_advanced {
         /// Get function count
         pub fn count(&self) -> usize {
             self.count
+        }
+    }
+
+    impl<const MAX_FUNCTIONS: usize> Default for WasmFunctionTable<MAX_FUNCTIONS> {
+        fn default() -> Self {
+            Self::new()
         }
     }
 }

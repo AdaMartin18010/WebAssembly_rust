@@ -2,7 +2,7 @@
 //!
 //! 提供 WASI 0.3 的完整实现，包括：
 //! - 原生 async/await 支持（无需手动管理 pollable handles）
-//! - stream<T> 和 future<T> 作为一等类型
+//! - `stream<T>` 和 `future<T>` 作为一等类型
 //! - 取消令牌与语言级集成
 //! - 组件模型异步支持
 //! - HTTP 请求原生异步
@@ -51,7 +51,8 @@ impl Wasi03Runtime {
     }
     
     /// 使用默认配置创建运行时
-    pub fn default() -> Self {
+    #[must_use]
+    pub fn with_default_config() -> Self {
         Self::new(RuntimeConfig::default())
     }
     
@@ -71,8 +72,7 @@ impl Wasi03Runtime {
     where
         F: Future<Output = Result<T, Wasi03Error>>,
     {
-        let results = futures::future::join_all(futures).await;
-        results
+        futures::future::join_all(futures).await
     }
     
     /// 创建新的流
@@ -144,6 +144,7 @@ impl Wasi03Runtime {
     }
     
     /// 递增任务计数
+    #[allow(dead_code)]
     async fn increment_task(&self) {
         let mut counter = self.task_counter.lock().await;
         *counter += 1;
@@ -537,6 +538,7 @@ pub mod filesystem {
     /// 文件
     #[derive(Debug)]
     pub struct File {
+        #[allow(dead_code)]
         path: String,
     }
     
@@ -545,7 +547,7 @@ pub mod filesystem {
         pub async fn read(path: impl Into<String>) -> Result<Vec<u8>, Wasi03Error> {
             // 使用 WASI 0.3 异步文件读取
             // 不再需要手动管理 pollable handles
-            let path = path.into();
+            let _path = path.into();
             
             // 模拟异步文件读取
             tokio::time::sleep(tokio::time::Duration::from_millis(5)).await;
@@ -570,20 +572,268 @@ pub mod filesystem {
     }
 }
 
+/// 定时器 (WASI 0.3)
+pub mod timer {
+    use std::time::Duration;
+    use std::pin::Pin;
+    use std::task::{Context, Poll};
+    
+    /// 单次定时器
+    pub struct Timer {
+        deadline: std::time::Instant,
+    }
+    
+    impl Timer {
+        /// 创建在指定时长后触发的定时器
+        pub fn after(duration: Duration) -> Self {
+            Self {
+                deadline: std::time::Instant::now() + duration,
+            }
+        }
+        
+        /// 创建在指定时间点触发的定时器
+        pub fn at(instant: std::time::Instant) -> Self {
+            Self { deadline: instant }
+        }
+        
+        /// 剩余时间
+        pub fn remaining(&self) -> Duration {
+            self.deadline.saturating_duration_since(std::time::Instant::now())
+        }
+        
+        /// 是否已过期
+        pub fn is_expired(&self) -> bool {
+            std::time::Instant::now() >= self.deadline
+        }
+    }
+    
+    impl std::future::Future for Timer {
+        type Output = ();
+        
+        fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+            if self.is_expired() {
+                Poll::Ready(())
+            } else {
+                // 重新注册 waker
+                let waker = cx.waker().clone();
+                let remaining = self.remaining();
+                tokio::spawn(async move {
+                    tokio::time::sleep(remaining).await;
+                    waker.wake();
+                });
+                Poll::Pending
+            }
+        }
+    }
+    
+    /// 周期定时器
+    pub struct Interval {
+        period: Duration,
+        next_tick: std::time::Instant,
+    }
+    
+    impl Interval {
+        /// 创建新的周期定时器
+        pub fn new(period: Duration) -> Self {
+            Self {
+                period,
+                next_tick: std::time::Instant::now() + period,
+            }
+        }
+        
+        /// 等待下一次 tick
+        pub async fn tick(&mut self) {
+            let timer = Timer::at(self.next_tick);
+            timer.await;
+            self.next_tick += self.period;
+        }
+        
+        /// 重置定时器
+        pub fn reset(&mut self) {
+            self.next_tick = std::time::Instant::now() + self.period;
+        }
+        
+        /// 获取周期
+        pub fn period(&self) -> Duration {
+            self.period
+        }
+    }
+    
+    /// 超时包装器
+    pub struct Timeout<T> {
+        future: Pin<Box<T>>,
+        timer: Timer,
+    }
+    
+    impl<T: std::future::Future> Timeout<T> {
+        /// 包装一个 future，添加超时
+        pub fn new(future: T, timeout: Duration) -> Self {
+            Self {
+                future: Box::pin(future),
+                timer: Timer::after(timeout),
+            }
+        }
+    }
+    
+    impl<T: std::future::Future> std::future::Future for Timeout<T> {
+        type Output = Result<T::Output, TimeoutError>;
+        
+        fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+            match self.future.as_mut().poll(cx) {
+                Poll::Ready(v) => Poll::Ready(Ok(v)),
+                Poll::Pending => {
+                    match Pin::new(&mut self.timer).poll(cx) {
+                        Poll::Ready(()) => Poll::Ready(Err(TimeoutError)),
+                        Poll::Pending => Poll::Pending,
+                    }
+                }
+            }
+        }
+    }
+    
+    /// 超时错误
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    pub struct TimeoutError;
+    
+    impl std::fmt::Display for TimeoutError {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            write!(f, "Operation timed out")
+        }
+    }
+    
+    impl std::error::Error for TimeoutError {}
+}
+
+/// 网络操作 (WASI 0.3)
+pub mod network {
+    use super::*;
+    use std::net::SocketAddr;
+    
+    /// TCP 监听器
+    pub struct TcpListener {
+        #[allow(dead_code)]
+        local_addr: SocketAddr,
+    }
+    
+    impl TcpListener {
+        /// 绑定到本地地址
+        pub async fn bind(addr: SocketAddr) -> Result<Self, Wasi03Error> {
+            // 使用 WASI 0.3 异步绑定
+            tokio::time::sleep(tokio::time::Duration::from_millis(1)).await;
+            Ok(Self { local_addr: addr })
+        }
+        
+        /// 接受连接
+        pub async fn accept(&self) -> Result<(TcpStream, SocketAddr), Wasi03Error> {
+            // 模拟接受连接
+            tokio::time::sleep(tokio::time::Duration::from_millis(1)).await;
+            let peer_addr = "127.0.0.1:8080".parse().unwrap();
+            Ok((TcpStream { peer_addr }, peer_addr))
+        }
+        
+        /// 获取本地地址
+        pub fn local_addr(&self) -> SocketAddr {
+            self.local_addr
+        }
+    }
+    
+    /// TCP 流
+    pub struct TcpStream {
+        #[allow(dead_code)]
+        peer_addr: SocketAddr,
+    }
+    
+    impl TcpStream {
+        /// 连接到远程地址
+        pub async fn connect(addr: SocketAddr) -> Result<Self, Wasi03Error> {
+            // 使用 WASI 0.3 异步连接
+            tokio::time::sleep(tokio::time::Duration::from_millis(10)).await;
+            Ok(Self { peer_addr: addr })
+        }
+        
+        /// 异步读取数据
+        pub async fn read(&mut self, buf: &mut [u8]) -> Result<usize, Wasi03Error> {
+            let _ = buf;
+            tokio::time::sleep(tokio::time::Duration::from_millis(1)).await;
+            Ok(0)
+        }
+        
+        /// 异步写入数据
+        pub async fn write(&mut self, buf: &[u8]) -> Result<usize, Wasi03Error> {
+            tokio::time::sleep(tokio::time::Duration::from_millis(1)).await;
+            Ok(buf.len())
+        }
+        
+        /// 获取对端地址
+        pub fn peer_addr(&self) -> SocketAddr {
+            self.peer_addr
+        }
+    }
+    
+    /// UDP 套接字
+    pub struct UdpSocket {
+        #[allow(dead_code)]
+        local_addr: SocketAddr,
+    }
+    
+    impl UdpSocket {
+        /// 绑定到本地地址
+        pub async fn bind(addr: SocketAddr) -> Result<Self, Wasi03Error> {
+            tokio::time::sleep(tokio::time::Duration::from_millis(1)).await;
+            Ok(Self { local_addr: addr })
+        }
+        
+        /// 发送数据报
+        pub async fn send_to(
+            &self,
+            buf: &[u8],
+            addr: SocketAddr,
+        ) -> Result<usize, Wasi03Error> {
+            let _ = addr;
+            tokio::time::sleep(tokio::time::Duration::from_millis(1)).await;
+            Ok(buf.len())
+        }
+        
+        /// 接收数据报
+        pub async fn recv_from(&self, buf: &mut [u8]) -> Result<(usize, SocketAddr), Wasi03Error> {
+            let _ = buf;
+            tokio::time::sleep(tokio::time::Duration::from_millis(1)).await;
+            let addr = "127.0.0.1:8080".parse().unwrap();
+            Ok((0, addr))
+        }
+        
+        /// 获取本地地址
+        pub fn local_addr(&self) -> SocketAddr {
+            self.local_addr
+        }
+    }
+    
+    /// DNS 解析
+    pub async fn resolve_hostname(hostname: &str) -> Result<Vec<SocketAddr>, Wasi03Error> {
+        // 模拟 DNS 解析
+        tokio::time::sleep(tokio::time::Duration::from_millis(10)).await;
+        let addr: SocketAddr = format!("{}:80", hostname).parse().map_err(|_| {
+            Wasi03Error::Other("Invalid address".to_string())
+        })?;
+        Ok(vec![addr])
+    }
+}
+
 /// 演示示例
 pub mod demo {
+    #[allow(unused_imports)]
     use super::*;
     use super::http::*;
     
     /// 演示流处理
     pub async fn stream_demo() -> Result<(), Wasi03Error> {
-        let runtime = Wasi03Runtime::default();
+        let runtime = Wasi03Runtime::with_default_config();
         let (writer, mut reader) = runtime.create_stream::<i32>();
         
         // 生产者任务
         let producer = tokio::spawn(async move {
             for i in 0..100 {
-                if let Err(_) = writer.send(i).await {
+                if writer.send(i).await.is_err() {
                     break;
                 }
             }
@@ -648,7 +898,7 @@ mod tests {
     
     #[tokio::test]
     async fn test_stream() {
-        let runtime = Wasi03Runtime::default();
+        let runtime = Wasi03Runtime::with_default_config();
         let (writer, mut reader) = runtime.create_stream::<i32>();
         
         writer.send(42).await.unwrap();
@@ -659,7 +909,7 @@ mod tests {
     
     #[tokio::test]
     async fn test_stream_batch() {
-        let runtime = Wasi03Runtime::default();
+        let runtime = Wasi03Runtime::with_default_config();
         let (writer, mut reader) = runtime.create_stream::<i32>();
         
         let items: Vec<i32> = (0..10).collect();
@@ -672,7 +922,7 @@ mod tests {
     
     #[tokio::test]
     async fn test_future() {
-        let runtime = Wasi03Runtime::default();
+        let runtime = Wasi03Runtime::with_default_config();
         let (completer, future) = runtime.create_future::<i32>();
         
         completer.complete(42).unwrap();
@@ -707,7 +957,7 @@ mod tests {
     
     #[tokio::test]
     async fn test_stream_cancel() {
-        let runtime = Wasi03Runtime::default();
+        let runtime = Wasi03Runtime::with_default_config();
         let (writer, reader) = runtime.create_stream::<i32>();
         
         // 取消读取端
@@ -726,5 +976,25 @@ mod tests {
         assert!(response.is_ok());
         let resp = response.unwrap();
         assert_eq!(resp.status, 200);
+    }
+    
+    #[tokio::test]
+    async fn test_timer() {
+        let start = std::time::Instant::now();
+        let timer = crate::wasi_03::timer::Timer::after(std::time::Duration::from_millis(50));
+        timer.await;
+        let elapsed = start.elapsed();
+        assert!(elapsed >= std::time::Duration::from_millis(50));
+    }
+    
+    #[tokio::test]
+    async fn test_interval() {
+        let mut interval = crate::wasi_03::timer::Interval::new(std::time::Duration::from_millis(10));
+        let mut count = 0;
+        for _ in 0..3 {
+            interval.tick().await;
+            count += 1;
+        }
+        assert_eq!(count, 3);
     }
 }

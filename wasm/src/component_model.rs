@@ -211,6 +211,7 @@ pub struct ComponentExport {
 }
 
 /// 组件组合器
+#[derive(Default)]
 pub struct ComponentComposer {
     components: Vec<Component>,
     wit_files: HashMap<String, String>,
@@ -223,13 +224,24 @@ pub struct CompositionGraph {
     edges: Vec<(ComponentId, ComponentId, String)>, // from, to, interface_name
 }
 
+impl CompositionGraph {
+    /// 获取节点数量
+    pub fn node_count(&self) -> usize {
+        self.nodes.len()
+    }
+    
+    /// 获取边数量
+    pub fn edge_count(&self) -> usize {
+        self.edges.len()
+    }
+}
+
+
 impl ComponentComposer {
+    /// 创建新的组件组合器
+    #[must_use]
     pub fn new() -> Self {
-        Self {
-            components: Vec::new(),
-            wit_files: HashMap::new(),
-            composition_graph: CompositionGraph::default(),
-        }
+        Self::default()
     }
     
     pub fn add_component(&mut self, component: Component) {
@@ -247,6 +259,16 @@ impl ComponentComposer {
             to.clone(),
             interface.into(),
         ));
+    }
+    
+    /// 获取组合图的节点数量
+    pub fn graph_node_count(&self) -> usize {
+        self.composition_graph.node_count()
+    }
+    
+    /// 获取组合图的边数量
+    pub fn graph_edge_count(&self) -> usize {
+        self.composition_graph.edge_count()
     }
     
     /// 组合多个组件
@@ -271,33 +293,34 @@ impl ComponentComposer {
         for component in &self.components {
             for import in &component.imports {
                 // 验证是否有对应的导出
-                let found = self.components.iter().any(|c| {
-                    c.exports.iter().any(|e| e.name == import.name)
-                });
-                
+                let found = self
+                    .components
+                    .iter()
+                    .any(|c| c.exports.iter().any(|e| e.name == import.name));
+
                 if !found {
                     return Err(CompositionError::MissingExport {
                         component: component.name.clone(),
                         import: import.name.clone(),
                     });
                 }
-                
+
                 // 验证接口签名匹配
-                let matching_export = self.components.iter()
+                let matching_export = self
+                    .components
+                    .iter()
                     .flat_map(|c| &c.exports)
                     .find(|e| e.name == import.name);
-                
-                if let Some(export) = matching_export {
-                    if !self.interfaces_compatible(&import.interface, &export.interface) {
-                        return Err(CompositionError::InterfaceMismatch {
-                            expected: import.name.clone(),
-                            actual: export.name.clone(),
-                        });
-                    }
+
+                if let Some(export) = matching_export && !self.interfaces_compatible(&import.interface, &export.interface) {
+                    return Err(CompositionError::InterfaceMismatch {
+                        expected: import.name.clone(),
+                        actual: export.name.clone(),
+                    });
                 }
             }
         }
-        
+
         Ok(())
     }
     
@@ -360,9 +383,9 @@ impl WitParser {
         // 解析函数定义（简化）
         for line in wit_content.lines() {
             let line = line.trim();
-            if line.starts_with("func ") {
+            if let Some(stripped) = line.strip_prefix("func ") {
                 // 简化的函数解析
-                let name = line[5..].split(':').next().unwrap_or("unknown").trim();
+                let name = stripped.split(':').next().unwrap_or("unknown").trim();
                 interface.add_function(WitFunction::new(name));
             }
         }
@@ -376,28 +399,33 @@ impl WitParser {
         
         // 生成类型定义
         for type_def in &interface.types {
-            output.push_str(&format!("  type {} = {}\n", 
-                type_def.name, 
+            output.push_str(&format!(
+                "  type {} = {}\n",
+                type_def.name,
                 Self::type_to_string(&type_def.definition)
             ));
         }
         
         // 生成函数定义
         for func in &interface.functions {
-            output.push_str(&format!("  {}func {}(", 
+            output.push_str(&format!(
+                "  {}func {}(",
                 if func.is_async { "async " } else { "" },
                 func.name
             ));
-            
+
             for (i, param) in func.params.iter().enumerate() {
-                if i > 0 { output.push_str(", "); }
-                output.push_str(&format!("{}: {}", 
-                    param.name, 
+                if i > 0 {
+                    output.push_str(", ");
+                }
+                output.push_str(&format!(
+                    "{}: {}",
+                    param.name,
                     Self::type_to_string(&param.param_type)
                 ));
             }
-            
-            output.push_str(")");
+
+            output.push(')');
             
             match &func.results {
                 WitResults::None => {},
@@ -407,14 +435,16 @@ impl WitParser {
                 WitResults::Multiple(results) => {
                     output.push_str(" -> (");
                     for (i, (name, ty)) in results.iter().enumerate() {
-                        if i > 0 { output.push_str(", "); }
+                        if i > 0 {
+                            output.push_str(", ");
+                        }
                         output.push_str(&format!("{}: {}", name, Self::type_to_string(ty)));
                     }
-                    output.push_str(")");
+                    output.push(')');
                 }
             }
             
-            output.push_str("\n");
+            output.push('\n');
         }
         
         output.push_str("}\n");

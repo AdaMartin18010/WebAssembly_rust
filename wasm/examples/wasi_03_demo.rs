@@ -37,7 +37,7 @@ async fn demo_stream() -> Result<(), Wasi03Error> {
     println!("▶ Demo 1: stream<T> - Native Streaming");
     println!("  WASI 0.3 introduces stream<T> as a first-class type\n");
     
-    let runtime = Wasi03Runtime::default();
+    let runtime = Wasi03Runtime::with_default_config();
     let (writer, mut reader) = runtime.create_stream::<i32>();
     
     // 生产者任务
@@ -71,7 +71,7 @@ async fn demo_future() -> Result<(), Wasi03Error> {
     println!("▶ Demo 2: future<T> - Native Futures");
     println!("  WASI 0.3 introduces future<T> as a first-class type\n");
     
-    let runtime = Wasi03Runtime::default();
+    let runtime = Wasi03Runtime::with_default_config();
     let (completer, future) = runtime.create_future::<String>();
     
     // 异步完成任务
@@ -161,16 +161,16 @@ async fn demo_concurrent() -> Result<(), Wasi03Error> {
     println!("▶ Demo 5: Concurrent Execution");
     println!("  Running multiple async tasks concurrently\n");
     
-    let runtime = Wasi03Runtime::default();
+    let runtime = Wasi03Runtime::with_default_config();
     
     // 创建多个 future
     let futures: Vec<_> = (0..5)
         .map(|i| {
-            let rt = &runtime;
+            let _rt = &runtime;
             async move {
                 tokio::time::sleep(tokio::time::Duration::from_millis(50 * (5 - i))).await;
                 println!("  Task {} completed", i);
-                Ok::<i32, Wasi03Error>(i * i)
+                Ok::<i64, Wasi03Error>((i * i) as i64)
             }
         })
         .collect();

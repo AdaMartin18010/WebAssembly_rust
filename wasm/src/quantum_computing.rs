@@ -597,6 +597,12 @@ impl QuantumComputingManager {
     }
 }
 
+impl Default for QuantumAlgorithmLibrary {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl QuantumAlgorithmLibrary {
     /// 创建新的量子算法库
     pub fn new() -> Self {
@@ -625,22 +631,28 @@ impl QuantumAlgorithmLibrary {
         let mut results = Vec::new();
 
         for algorithm in algorithms.values() {
-            if let Some(cat) = &category {
-                if algorithm.category != *cat {
-                    continue;
-                }
+            if let Some(cat) = &category
+                && algorithm.category != *cat
+            {
+                continue;
             }
 
-            if let Some(q) = query {
-                if !algorithm.name.contains(q) && !algorithm.description.contains(q) {
-                    continue;
-                }
+            if let Some(q) = query
+                && !algorithm.name.contains(q) && !algorithm.description.contains(q)
+            {
+                continue;
             }
 
             results.push(algorithm.clone());
         }
 
         results
+    }
+}
+
+impl Default for QuantumCircuitCompiler {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -680,6 +692,12 @@ impl QuantumCircuitCompiler {
         }
         
         Ok(compiled_circuit)
+    }
+}
+
+impl Default for QuantumSimulator {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -728,23 +746,23 @@ impl QuantumSimulator {
     }
 
     /// 应用量子门
-    fn apply_gate(&self, state_vector: &mut Vec<Complex>, gate_op: &QuantumGateOperation) -> Result<(), QuantumError> {
+    fn apply_gate(&self, state_vector: &mut [Complex], gate_op: &QuantumGateOperation) -> Result<(), QuantumError> {
         // 简化的门应用实现
         match gate_op.gate {
             QuantumGate::H => {
                 // Hadamard 门实现
-                if let Some(qubit) = gate_op.target_qubits.first() {
-                    if *qubit < state_vector.len() as u32 {
-                        // 简化的 Hadamard 门应用
-                    }
+                if let Some(qubit) = gate_op.target_qubits.first()
+                    && *qubit < state_vector.len() as u32
+                {
+                    // 简化的 Hadamard 门应用
                 }
             },
             QuantumGate::CNOT => {
                 // CNOT 门实现
-                if let (Some(control), Some(target)) = (gate_op.control_qubits.first(), gate_op.target_qubits.first()) {
-                    if *control < state_vector.len() as u32 && *target < state_vector.len() as u32 {
-                        // 简化的 CNOT 门应用
-                    }
+                if let (Some(control), Some(target)) = (gate_op.control_qubits.first(), gate_op.target_qubits.first())
+                    && *control < state_vector.len() as u32 && *target < state_vector.len() as u32
+                {
+                    // 简化的 CNOT 门应用
                 }
             },
             _ => {
@@ -761,7 +779,7 @@ impl QuantumSimulator {
         if qubit_index < state_vector.len() {
             // 基于概率的测量
             let probability = state_vector[qubit_index].real.abs().powi(2);
-            if rand::thread_rng().r#gen::<f64>() < probability {
+            if rand::rng().random::<f64>() < probability {
                 Ok(0)
             } else {
                 Ok(1)

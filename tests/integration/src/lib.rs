@@ -85,11 +85,14 @@ mod main {
         let mut calc = MathCalculator::new();
         
         // 测试内存存储
-        calc.store("pi", 3.14159);
-        calc.store("e", 2.71828);
-        
-        assert_eq!(calc.recall("pi"), Some(3.14159));
-        assert_eq!(calc.recall("e"), Some(2.71828));
+        #[allow(clippy::approx_constant)]
+        {
+            calc.store("pi", 3.14159);
+            calc.store("e", 2.71828);
+            
+            assert_eq!(calc.recall("pi"), Some(3.14159));
+            assert_eq!(calc.recall("e"), Some(2.71828));
+        }
         assert_eq!(calc.recall("nonexistent"), None);
         
         // 测试矩阵乘法

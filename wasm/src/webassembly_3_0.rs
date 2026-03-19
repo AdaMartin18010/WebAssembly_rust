@@ -91,20 +91,18 @@ impl WebAssembly3Module {
         let mut errors = Vec::new();
         
         // 验证特性依赖
-        if self.supports_feature(&WebAssembly3Feature::ExceptionHandlingExnref) {
-            if !self.supports_feature(&WebAssembly3Feature::ReferenceTypes) {
-                errors.push(ValidationError::FeatureDependency {
-                    feature: "ExceptionHandlingExnref".to_string(),
-                    requires: "ReferenceTypes".to_string(),
-                });
-            }
+        if self.supports_feature(&WebAssembly3Feature::ExceptionHandlingExnref)
+            && !self.supports_feature(&WebAssembly3Feature::ReferenceTypes)
+        {
+            errors.push(ValidationError::FeatureDependency {
+                feature: "ExceptionHandlingExnref".to_string(),
+                requires: "ReferenceTypes".to_string(),
+            });
         }
         
         // 验证内存
-        if let Some(ref mem) = self.memory64 {
-            if let Err(e) = mem.validate() {
-                errors.push(ValidationError::MemoryError(e.to_string()));
-            }
+        if let Some(ref mem) = self.memory64 && let Err(e) = mem.validate() {
+            errors.push(ValidationError::MemoryError(e.to_string()));
         }
         
         ValidationResult {
@@ -193,36 +191,33 @@ impl Memory64 {
         let current_pages = self.size_pages();
         let new_pages = current_pages + delta_pages;
         
-        if let Some(max) = self.maximum_pages {
-            if new_pages > max {
-                return Err(Memory64Error::MemoryLimitExceeded);
-            }
-        }
-        
-        let new_size = new_pages * WASM_PAGE_SIZE_64;
-        if new_size > (1024 * 1024 * 1024 * 16) { // 16GB 限制
+        if let Some(max) = self.maximum_pages && new_pages > max {
             return Err(Memory64Error::MemoryLimitExceeded);
         }
-        
+
+        let new_size = new_pages * WASM_PAGE_SIZE_64;
+        if new_size > (1024 * 1024 * 1024 * 16) {
+            // 16GB 限制
+            return Err(Memory64Error::MemoryLimitExceeded);
+        }
+
         self.data.resize(new_size as usize, 0);
         Ok(current_pages)
     }
-    
+
     /// 验证内存
     pub fn validate(&self) -> Result<(), Memory64Error> {
         if self.initial_pages == 0 {
             return Err(Memory64Error::InvalidSize);
         }
-        
-        if let Some(max) = self.maximum_pages {
-            if max < self.initial_pages {
-                return Err(Memory64Error::InvalidSize);
-            }
+
+        if let Some(max) = self.maximum_pages && max < self.initial_pages {
+            return Err(Memory64Error::InvalidSize);
         }
-        
+
         Ok(())
     }
-    
+
     /// 批量复制
     pub fn bulk_copy(&mut self, src: u64, dst: u64, size: u64) -> Result<(), Memory64Error> {
         if src + size > self.data.len() as u64 || dst + size > self.data.len() as u64 {
@@ -599,8 +594,8 @@ pub struct GcObject {
     pub marked: bool,
 }
 
-impl WebAssembly3Runtime {
-    pub fn new() -> Self {
+impl Default for WebAssembly3Runtime {
+    fn default() -> Self {
         Self {
             modules: HashMap::new(),
             gc_heap: GcHeap {
@@ -608,6 +603,13 @@ impl WebAssembly3Runtime {
                 next_id: 1,
             },
         }
+    }
+}
+
+impl WebAssembly3Runtime {
+    /// 创建新的运行时
+    pub fn new() -> Self {
+        Self::default()
     }
     
     pub fn load_module(&mut self, module: WebAssembly3Module) -> ModuleId {
@@ -629,6 +631,16 @@ impl WebAssembly3Runtime {
         
         self.gc_heap.objects.insert(id, obj);
         id
+    }
+    
+    /// 获取GC堆中的对象数量
+    pub fn gc_object_count(&self) -> usize {
+        self.gc_heap.objects.len()
+    }
+    
+    /// 获取GC对象数据（如果存在）
+    pub fn get_gc_object_data(&self, id: u32) -> Option<&Vec<u8>> {
+        self.gc_heap.objects.get(&id).map(|obj| &obj.data)
     }
 }
 

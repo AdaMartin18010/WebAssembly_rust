@@ -220,6 +220,12 @@ pub enum GatewayError {
     ServiceError(String),
 }
 
+impl Default for ApiGatewayManager {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ApiGatewayManager {
     /// 创建新的 API 网关管理器
     pub fn new() -> Self {
@@ -259,7 +265,7 @@ impl ApiGatewayManager {
         let instance = self.load_balancer.select_instance(&route.target_service)?;
 
         // 发送请求到后端服务
-        let response = self.forward_request(&request, &instance).await?;
+        let response = self.forward_request(&request, instance).await?;
 
         let processing_time = start_time.elapsed();
 
@@ -294,6 +300,12 @@ impl ApiGatewayManager {
     }
 }
 
+impl Default for LoadBalancer {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl LoadBalancer {
     /// 创建新的负载均衡器
     #[allow(unused_variables)]
@@ -309,7 +321,13 @@ impl LoadBalancer {
     pub fn select_instance(&self, service_name: &str) -> Result<&ServiceInstance, GatewayError> {
         // 简化的负载均衡实现
         self.instances.first()
-            .ok_or_else(|| GatewayError::ServiceError("没有可用的服务实例".to_string()))
+            .ok_or(GatewayError::ServiceError("没有可用的服务实例".to_string()))
+    }
+}
+
+impl Default for RateLimiter {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -328,6 +346,12 @@ impl RateLimiter {
     pub fn check_limit(&self, client_ip: &str) -> Result<(), GatewayError> {
         // 简化的限流检查实现
         Ok(())
+    }
+}
+
+impl Default for Cache {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

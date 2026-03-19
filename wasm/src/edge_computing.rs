@@ -659,15 +659,21 @@ impl EdgeComputingManager {
     }
 }
 
-impl TaskScheduler {
-    /// 创建新的任务调度器
-    pub fn new() -> Self {
+impl Default for TaskScheduler {
+    fn default() -> Self {
         Self {
             scheduling_strategy: SchedulingStrategy::LoadBalancing,
             task_queue: Arc::new(Mutex::new(VecDeque::new())),
             running_tasks: Arc::new(Mutex::new(HashMap::new())),
             task_history: Arc::new(Mutex::new(Vec::new())),
         }
+    }
+}
+
+impl TaskScheduler {
+    /// 创建新的任务调度器
+    pub fn new() -> Self {
+        Self::default()
     }
 
     /// 调度任务
@@ -726,14 +732,20 @@ impl TaskScheduler {
     }
 }
 
-impl ResourceManager {
-    /// 创建新的资源管理器
-    pub fn new() -> Self {
+impl Default for ResourceManager {
+    fn default() -> Self {
         Self {
             resource_pool: Arc::new(Mutex::new(HashMap::new())),
             allocation_strategy: ResourceAllocationStrategy::BestFit,
-            resource_monitor: ResourceMonitor::new(),
+            resource_monitor: ResourceMonitor::default(),
         }
+    }
+}
+
+impl ResourceManager {
+    /// 创建新的资源管理器
+    pub fn new() -> Self {
+        Self::default()
     }
 
     /// 分配资源
@@ -766,9 +778,8 @@ impl ResourceManager {
     }
 }
 
-impl ResourceMonitor {
-    /// 创建新的资源监控器
-    pub fn new() -> Self {
+impl Default for ResourceMonitor {
+    fn default() -> Self {
         Self {
             monitoring_interval: Duration::from_secs(10),
             monitoring_data: Arc::new(Mutex::new(Vec::new())),
@@ -783,9 +794,15 @@ impl ResourceMonitor {
     }
 }
 
-impl NetworkManager {
-    /// 创建新的网络管理器
+impl ResourceMonitor {
+    /// 创建新的资源监控器
     pub fn new() -> Self {
+        Self::default()
+    }
+}
+
+impl Default for NetworkManager {
+    fn default() -> Self {
         Self {
             network_topology: NetworkTopology {
                 node_connections: HashMap::new(),
@@ -798,6 +815,13 @@ impl NetworkManager {
                 connection_status: Arc::new(Mutex::new(HashMap::new())),
             },
         }
+    }
+}
+
+impl NetworkManager {
+    /// 创建新的网络管理器
+    pub fn new() -> Self {
+        Self::default()
     }
 }
 

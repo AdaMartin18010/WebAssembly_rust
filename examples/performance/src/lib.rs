@@ -85,6 +85,7 @@ mod main {
 
     // 高性能数学计算器
     #[wasm_bindgen]
+    #[derive(Default)]
     pub struct PerformanceCalculator {
         cache: std::collections::HashMap<u32, u64>,
     }
@@ -93,9 +94,7 @@ mod main {
     impl PerformanceCalculator {
         #[wasm_bindgen(constructor)]
         pub fn new() -> PerformanceCalculator {
-            PerformanceCalculator {
-                cache: std::collections::HashMap::new(),
-            }
+            Self::default()
         }
 
         // 高性能斐波那契计算（带缓存）
@@ -237,6 +236,7 @@ mod main {
 
     // 内存分配性能测试器
     #[wasm_bindgen]
+    #[derive(Default)]
     pub struct MemoryAllocator {
         allocations: Vec<Vec<u8>>,
     }
@@ -245,9 +245,7 @@ mod main {
     impl MemoryAllocator {
         #[wasm_bindgen(constructor)]
         pub fn new() -> MemoryAllocator {
-            MemoryAllocator {
-                allocations: Vec::new(),
-            }
+            Self::default()
         }
 
         #[wasm_bindgen]
@@ -298,6 +296,7 @@ mod main {
 
     // SIMD性能测试器
     #[wasm_bindgen]
+    #[derive(Default)]
     pub struct SimdCalculator {
         _simd_enabled: bool,
     }
@@ -306,9 +305,7 @@ mod main {
     impl SimdCalculator {
         #[wasm_bindgen(constructor)]
         pub fn new() -> SimdCalculator {
-            SimdCalculator {
-                _simd_enabled: true, // 假设SIMD可用
-            }
+            Self::default()
         }
 
         #[wasm_bindgen]
@@ -368,6 +365,7 @@ mod main {
 
     // 综合性能测试套件
     #[wasm_bindgen]
+    #[derive(Default)]
     pub struct PerformanceTestSuite {
         calculator: PerformanceCalculator,
         allocator: MemoryAllocator,
@@ -378,11 +376,7 @@ mod main {
     impl PerformanceTestSuite {
         #[wasm_bindgen(constructor)]
         pub fn new() -> PerformanceTestSuite {
-            PerformanceTestSuite {
-                calculator: PerformanceCalculator::new(),
-                allocator: MemoryAllocator::new(),
-                simd_calc: SimdCalculator::new(),
-            }
+            Self::default()
         }
 
         #[wasm_bindgen]

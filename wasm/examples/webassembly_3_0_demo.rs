@@ -102,7 +102,7 @@ fn demo_wasmgc() {
             },
             GcField {
                 name: "age".to_string(),
-                value_type: ValueType::S32,
+                value_type: ValueType::I32,
                 mutable: true,
             },
         ],
@@ -153,13 +153,13 @@ fn demo_exception_handling() {
     // 创建异常标签
     let error_tag = ExnrefTag {
         index: 0,
-        params: vec![ValueType::I32, ValueType::String],
+        params: vec![ValueType::I32, ValueType::I32],
         name: "Error".to_string(),
     };
     
     let panic_tag = ExnrefTag {
         index: 1,
-        params: vec![ValueType::String],
+        params: vec![ValueType::I32],
         name: "Panic".to_string(),
     };
     
@@ -302,10 +302,10 @@ fn demo_runtime() {
     let obj_id = runtime.allocate_gc_object(struct_type, vec![1, 2, 3, 4, 5]);
     println!("  Allocated GC object with ID: {}", obj_id);
     
-    println!("  Total GC objects: {}", runtime.gc_heap.objects.len());
+    println!("  Total GC objects: {}", runtime.gc_object_count());
     
-    if let Some(obj) = runtime.gc_heap.objects.get(&obj_id) {
-        println!("  Object data: {:?}", obj.data);
+    if let Some(data) = runtime.get_gc_object_data(obj_id) {
+        println!("  Object data: {:?}", data);
     }
     
     println!();

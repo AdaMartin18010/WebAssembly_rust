@@ -6,7 +6,7 @@
 //! This library provides complete integration of:
 //! - Rust 1.94 new features (array_windows, SIMD FP16, enhanced LazyLock)
 //! - WebAssembly 3.0 (WasmGC, Memory64, Exception Handling with exnref)
-//! - WASI 0.3 (native async/await, stream<T>, future<T>)
+//! - WASI 0.3 (native async/await, `stream<T>`, `future<T>`)
 //! - Component Model (WIT definitions, polyglot composition)
 
 pub mod common;
@@ -97,6 +97,8 @@ pub use wasi_03::{
     Wasi03Error,
     http::{self, HttpClient, HttpRequest, HttpResponse, HttpMethod},
     filesystem::{self, File},
+    timer::{self, Timer, Interval, Timeout, TimeoutError},
+    network::{self, TcpListener, TcpStream, UdpSocket},
     demo,
 };
 

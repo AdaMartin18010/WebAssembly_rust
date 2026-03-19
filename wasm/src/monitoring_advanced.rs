@@ -1312,6 +1312,12 @@ impl HealthChecker {
 #[derive(Debug)]
 pub struct StatisticalAnalyzer;
 
+impl Default for StatisticalAnalyzer {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl StatisticalAnalyzer {
     /// 创建新的统计分析器
     /// Create new statistical analyzer

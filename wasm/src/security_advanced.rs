@@ -506,6 +506,12 @@ pub struct SecurityStatistics {
     pub average_detection_time: Duration,
 }
 
+impl Default for AdvancedSecurityManager {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl AdvancedSecurityManager {
     /// 创建新的安全管理器
     /// Create new security manager
@@ -682,6 +688,12 @@ pub struct SecurityReport {
     pub threat_summary: HashMap<ThreatType, u64>,
 }
 
+impl Default for MemoryMonitor {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl MemoryMonitor {
     /// 创建新的内存监控器
     /// Create new memory monitor
@@ -771,6 +783,12 @@ pub struct MemoryLeak {
     pub leak_duration: Duration,
 }
 
+impl Default for MemoryLeakDetector {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl MemoryLeakDetector {
     /// 创建新的内存泄漏检测器
     /// Create new memory leak detector
@@ -779,6 +797,12 @@ impl MemoryLeakDetector {
             detection_threshold: Duration::from_secs(30), // 30秒阈值
             suspicious_allocations: HashMap::new(),
         }
+    }
+}
+
+impl Default for ExecutionMonitor {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -824,6 +848,12 @@ impl ExecutionMonitor {
     }
 }
 
+impl Default for PerformanceMonitor {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl PerformanceMonitor {
     /// 创建新的性能监控器
     /// Create new performance monitor
@@ -861,19 +891,20 @@ impl PerformanceMonitor {
         let mut violations = Vec::new();
 
         for (name, metric) in &self.metrics {
-            if let Some(&threshold) = self.thresholds.get(name) {
-                if metric.current_value > threshold {
-                    violations.push(ThresholdViolation {
-                        metric_name: name.clone(),
-                        current_value: metric.current_value,
-                        threshold,
-                        severity: if metric.current_value > threshold * 2.0 {
-                            SecuritySeverity::Critical
-                        } else {
-                            SecuritySeverity::Warning
-                        },
-                    });
-                }
+            if let Some(&threshold) = self.thresholds.get(name)
+                && metric.current_value > threshold
+            {
+                let severity = if metric.current_value > threshold * 2.0 {
+                    SecuritySeverity::Critical
+                } else {
+                    SecuritySeverity::Warning
+                };
+                violations.push(ThresholdViolation {
+                    metric_name: name.clone(),
+                    current_value: metric.current_value,
+                    threshold,
+                    severity,
+                });
             }
         }
 
@@ -893,6 +924,12 @@ pub struct ThresholdViolation {
     pub threshold: f64,
     /// 严重程度
     pub severity: SecuritySeverity,
+}
+
+impl Default for AnomalyDetector {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl AnomalyDetector {
@@ -967,6 +1004,12 @@ pub enum AnomalyType {
     ExceptionCount,
 }
 
+impl Default for SecurityStatistics {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SecurityStatistics {
     /// 创建新的安全统计信息
     /// Create new security statistics
@@ -1005,7 +1048,6 @@ pub enum SecurityError {
 
 /// 内置威胁检测器实现
 /// Built-in Threat Detector Implementation
-
 /// 缓冲区溢出检测器
 /// Buffer Overflow Detector
 pub struct BufferOverflowDetector;
@@ -1050,21 +1092,21 @@ impl ThreatDetector for CodeInjectionDetector {
     fn detect_threat(&self, context: &SecurityContext) -> Vec<ThreatDetection> {
         let mut detections = Vec::new();
 
-        if let OperationType::FunctionCall = context.operation_type {
+        if let (OperationType::FunctionCall, Some(Value::FuncRef(Some(func_ref)))) = 
+            (context.operation_type.clone(), context.parameters.get("function")) {
             // 检查函数指针是否可疑
-            if let Some(Value::FuncRef(Some(func_ref))) = context.parameters.get("function") {
-                if *func_ref == 0 || *func_ref > 10000 {
-                    detections.push(ThreatDetection {
-                        threat_type: ThreatType::CodeInjection,
-                        severity: SecuritySeverity::Critical,
-                        confidence: 0.8,
-                        details: format!("可疑的函数引用: {}", func_ref),
-                        mitigation_suggestions: vec![
-                            "验证函数指针".to_string(),
-                            "检查函数表".to_string(),
-                        ],
-                    });
-                }
+            if *func_ref == 0 || *func_ref > 10000 {
+                let details = format!("可疑的函数引用: {}", func_ref);
+                detections.push(ThreatDetection {
+                    threat_type: ThreatType::CodeInjection,
+                    severity: SecuritySeverity::Critical,
+                    confidence: 0.8,
+                    details,
+                    mitigation_suggestions: vec![
+                        "验证函数指针".to_string(),
+                        "检查函数表".to_string(),
+                    ],
+                });
             }
         }
 

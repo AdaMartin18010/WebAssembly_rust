@@ -463,6 +463,12 @@ pub struct ErrorStatistics {
     pub internal_errors: usize,
 }
 
+impl Default for ErrorStatistics {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ErrorStatistics {
     pub fn new() -> Self {
         Self {

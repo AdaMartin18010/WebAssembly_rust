@@ -179,8 +179,8 @@ fn demo_component_composition() {
     
     println!("  Components: 3");
     println!("  Connections: 2");
-    println!("  Graph nodes: {}", composer.composition_graph.nodes.len());
-    println!("  Graph edges: {}", composer.composition_graph.edges.len());
+    println!("  Graph nodes: {}", composer.graph_node_count());
+    println!("  Graph edges: {}", composer.graph_edge_count());
     
     // 尝试组合
     match composer.compose() {

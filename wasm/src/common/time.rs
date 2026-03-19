@@ -9,8 +9,8 @@ use chrono::{DateTime, Utc, Local, TimeZone};
 
 /// 时间戳类型 / Timestamp Type
 ///
-/// 使用 chrono::DateTime<Utc> 作为统一的时间戳类型，支持序列化。
-/// Uses chrono::DateTime<Utc> as the unified timestamp type with serialization support.
+/// 使用 `chrono::DateTime<Utc>` 作为统一的时间戳类型，支持序列化。
+/// Uses `chrono::DateTime<Utc>` as the unified timestamp type with serialization support.
 pub type Timestamp = DateTime<Utc>;
 
 /// 本地时间戳类型 / Local Timestamp Type
@@ -33,7 +33,7 @@ impl TimeUtils {
     /// 从系统时间创建时间戳 / Create timestamp from system time
     pub fn from_system_time(system_time: SystemTime) -> Timestamp {
         system_time.duration_since(UNIX_EPOCH)
-            .map(|duration| Utc.timestamp_opt(duration.as_secs() as i64, duration.subsec_nanos()).single().unwrap_or_else(|| Utc::now()))
+            .map(|duration| Utc.timestamp_opt(duration.as_secs() as i64, duration.subsec_nanos()).single().unwrap_or_else(Utc::now))
             .unwrap_or_else(|_| Utc::now())
     }
     
@@ -235,10 +235,10 @@ impl<T> TimeSeries<T> {
         self.points.push(point);
         
         // 如果超过最大数据点数量，移除最旧的数据点
-        if let Some(max_points) = self.max_points {
-            if self.points.len() > max_points {
-                self.points.remove(0);
-            }
+        if let Some(max_points) = self.max_points
+            && self.points.len() > max_points
+        {
+            self.points.remove(0);
         }
     }
     

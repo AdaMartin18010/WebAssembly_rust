@@ -477,7 +477,7 @@ impl ModuleMarketplaceManager {
         // 获取模块
         let mut registry = self.registry.lock().unwrap();
         let module = registry.get_mut(module_id)
-            .ok_or_else(|| MarketplaceError::ModuleNotFound)?;
+            .ok_or(MarketplaceError::ModuleNotFound)?;
 
         // 更新下载统计
         module.download_count += 1;
@@ -601,6 +601,12 @@ pub enum SortBy {
     Name,
 }
 
+impl Default for UserManager {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl UserManager {
     /// 创建新的用户管理器
     pub fn new() -> Self {
@@ -618,6 +624,12 @@ impl UserManager {
         } else {
             false
         }
+    }
+}
+
+impl Default for PermissionManager {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -643,9 +655,8 @@ impl PermissionManager {
     }
 }
 
-impl RatingSystem {
-    /// 创建新的评分系统
-    pub fn new() -> Self {
+impl Default for RatingSystem {
+    fn default() -> Self {
         Self {
             ratings: Arc::new(Mutex::new(HashMap::new())),
             config: RatingConfig {
@@ -656,11 +667,18 @@ impl RatingSystem {
             },
         }
     }
+}
+
+impl RatingSystem {
+    /// 创建新的评分系统
+    pub fn new() -> Self {
+        Self::default()
+    }
 
     /// 添加评分
     pub fn add_rating(&self, module_id: &str, rating: Rating) -> Result<(), MarketplaceError> {
         let mut ratings = self.ratings.lock().unwrap();
-        let module_ratings = ratings.entry(module_id.to_string()).or_insert_with(Vec::new);
+        let module_ratings = ratings.entry(module_id.to_string()).or_default();
         module_ratings.push(rating);
         Ok(())
     }

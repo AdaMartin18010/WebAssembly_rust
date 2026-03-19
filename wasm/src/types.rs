@@ -43,7 +43,7 @@ use thiserror::Error;
 ///
 /// ## 使用示例 / Usage Example
 /// ```rust
-/// use c16_webassembly::types::Value;
+/// use wasm::types::Value;
 ///
 /// // 创建不同类型的值
 /// let int_val = Value::I32(42);
@@ -224,6 +224,7 @@ impl Value {
     }
 
     /// 获取值的字节表示 / Get Byte Representation of Value
+    #[allow(clippy::wrong_self_convention)]
     pub fn to_bytes(&self) -> Vec<u8> {
         match self {
             Value::I32(val) => val.to_le_bytes().to_vec(),
@@ -494,6 +495,12 @@ impl ModuleId {
         Self {
             id: COUNTER.fetch_add(1, Ordering::Relaxed),
         }
+    }
+}
+
+impl Default for ModuleId {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -1202,6 +1209,7 @@ pub enum ValidationError {
 /// Defines errors that may occur during compilation.
 #[derive(Debug, Clone, Serialize, Deserialize, Error)]
 #[allow(dead_code)]
+#[allow(clippy::enum_variant_names)]
 pub enum CompilationError {
     /// 语法错误 / Syntax Error
     #[error("语法错误: {0}")]
@@ -1577,6 +1585,13 @@ unsafe extern "C" {
 }
 
 /// 调用外部128位整数函数 / Call external 128-bit integer functions
+///
+/// # Safety
+///
+/// This function is unsafe because it calls external C functions that may have
+/// undefined behavior if the inputs are not valid. The caller must ensure that
+/// the external functions are properly linked and that any pointers or values
+/// passed are valid.
 #[allow(dead_code)]
 pub unsafe fn call_external_128bit_functions() -> (i128, u128) {
     // 模拟外部函数调用，实际应用中会调用真实的外部函数
